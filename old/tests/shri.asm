@@ -1,0 +1,4 @@
+lui r0, #0x80;
+shri r0, #0xF;
+lui r1, #0x80;
+shri r1, #0x1F;

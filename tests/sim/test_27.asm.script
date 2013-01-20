@@ -1,0 +1,6 @@
+goto 0
+read 7 8
+cycle 16
+read 7 8
+show
+quit

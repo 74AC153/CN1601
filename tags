@@ -1,0 +1,137 @@
+BITMASK	instructions.c	/^#define BITMASK(WIDTH, START) \\$/
+INSTRUCTIONS_H	instructions.h	/^#define INSTRUCTIONS_H$/
+INSTR_TABLE_H	instr_table.h	/^#define INSTR_TABLE_H$/
+MAX_WORDS	asm.c	/^#define MAX_WORDS 65536$/
+MEMIF_DELAY	sim_memif.h	/^#define MEMIF_DELAY 1$/
+Masm	asm.c	/^int main(int argc, char *argv[])$/
+Mdasm	dasm.c	/^int main(int argc, char *argv[])$/
+Minstructions_test	instructions_test.c	/^int main(int argc, char *argv[])$/
+Msim	sim.c	/^int main(int argc, char *argv[])$/
+Msim_core_test	sim_core_test.c	/^int main(int argc, char *argv[])$/
+OPCODE_NUMBITS	instr_table.h	/^#define OPCODE_NUMBITS 5 $/
+OPCODE_STARTBIT	instr_table.h	/^#define OPCODE_STARTBIT 11$/
+PHYSMEM_NUMWORDS	sim.c	/^#define PHYSMEM_NUMWORDS 65535$/
+SET_BIT	sim_core.c	/^#define SET_BIT(FIELD, BIT, VAL) \\$/
+SGNEXTEND	asm.c	/^#define SGNEXTEND(VAL, TYPE, BITNUM) \\$/
+SIM_CORE_H	sim_core.h	/^#define SIM_CORE_H$/
+SIM_CORE_NUM_CPREGS	sim_core.h	/^#define SIM_CORE_NUM_CPREGS 32$/
+SIM_CORE_NUM_CTLREGS	sim_core.h	/^#define SIM_CORE_NUM_CTLREGS 32$/
+SIM_CORE_NUM_EXTINT	sim_core.h	/^#define SIM_CORE_NUM_EXTINT 8$/
+SIM_CORE_NUM_GPREGS	sim_core.h	/^#define SIM_CORE_NUM_GPREGS 8$/
+SIM_CP_TIMER_H	sim_cp_timer.h	/^#define SIM_CP_TIMER_H$/
+SIM_MEMIF_H	sim_memif.h	/^#define SIM_MEMIF_H$/
+SIM_PHYSMEM_ADDR_BITS	sim_physmem.h	/^#define SIM_PHYSMEM_ADDR_BITS 16$/
+SIM_PHYSMEM_DATA_BITS	sim_physmem.h	/^#define SIM_PHYSMEM_DATA_BITS 16$/
+SIM_PHYSMEM_H	sim_physmem.h	/^#define SIM_PHYSMEM_H$/
+SIM_PHYSMEM_LEN	sim_physmem.h	/^#define SIM_PHYSMEM_LEN (0x1 << (SIM_PHYSMEM_ADDR_/
+SIM_UTILS_H	sim_utils.h	/^#define SIM_UTILS_H$/
+STATUS_GET_GIE	sim_core.h	/^#define STATUS_GET_GIE(STAT) (((STAT) >> 14) & 0x1/
+STATUS_GET_LL	sim_core.h	/^#define STATUS_GET_LL(STAT) (((STAT) >> 12) & 0x1)/
+STATUS_GET_RUMODE	sim_core.h	/^#define STATUS_GET_RUMODE(STAT) (((STAT) >> 13) & /
+STATUS_GET_SWIARG	sim_core.h	/^#define STATUS_GET_SWIARG(STAT) ((STAT) & 0x7FF)$/
+STATUS_GET_UM	sim_core.h	/^#define STATUS_GET_UM(STAT) (((STAT) >> 15) & 0x1)/
+STATUS_GET_UMSAVE	sim_core.h	/^#define STATUS_GET_UMSAVE(STAT) (((STAT) >> 11) & /
+STATUS_SET_GIE	sim_core.h	/^#define STATUS_SET_GIE(STAT, VAL) \\$/
+STATUS_SET_LL	sim_core.h	/^#define STATUS_SET_LL(STAT, VAL) \\$/
+STATUS_SET_RUMODE	sim_core.h	/^#define STATUS_SET_RUMODE(STAT, VAL) \\$/
+STATUS_SET_SWIARG	sim_core.h	/^#define STATUS_SET_SWIARG(STAT, VAL) \\$/
+STATUS_SET_UM	sim_core.h	/^#define STATUS_SET_UM(STAT, VAL) \\$/
+STATUS_SET_UMSAVE	sim_core.h	/^#define STATUS_SET_UMSAVE(STAT, VAL) \\$/
+SUBCODE_NUMBITS	instr_table.h	/^#define SUBCODE_NUMBITS 2$/
+SUBCODE_STARTBIT	instr_table.h	/^#define SUBCODE_STARTBIT 0$/
+SYN_TESTMISMATCH_FAIL	asm.c	/^#define SYN_TESTMISMATCH_FAIL(EXPECT) \\$/
+TEST_BIT	sim_core.c	/^#define TEST_BIT(FIELD, BIT) \\$/
+TIMER_CPNUM	sim.c	/^#define TIMER_CPNUM 0$/
+TIMER_CTL_GET_ENABLED	sim_cp_timer.h	/^#define TIMER_CTL_GET_ENABLED(CTL) ((CTL) & 0x1)$/
+TIMER_CTL_SET_ENABLED	sim_cp_timer.h	/^#define TIMER_CTL_SET_ENABLED(CTL, VAL) \\$/
+TRACE	sim_core.c	/^#define TRACE(STATE, ...) do{if((STATE)->trace)pri/
+TRACEBLOCK	sim_core.c	/^#define TRACEBLOCK(STATE, BLOCK) do{if((STATE)->tr/
+UTILS_H	utils.h	/^#define UTILS_H$/
+VERBOSE	instructions_test.c	/^\/\/#define VERBOSE$/
+alu_exec	sim_core.c	/^uint16_t alu_exec(alu_op_t op, uint16_t arg0, uint/
+alu_op_t	sim_core.c	/^} alu_op_t;$/
+assemble_instruction	instructions.c	/^int assemble_instruction($/
+check_pending_interrupt	sim_core.c	/^int check_pending_interrupt($/
+cli_args_t	sim.c	/^} cli_args_t;$/
+cli_opts_t	sim_core_test.c	/^} cli_opts_t;$/
+coproc_op_t	sim_core.h	/^} coproc_op_t;$/
+cp_timer_instr_t	sim_cp_timer.h	/^} cp_timer_instr_t;$/
+cycle	sim.c	/^void cycle(void)$/
+decode_instruction	instructions.c	/^int decode_instruction($/
+demux_lines	sim_utils.c	/^void demux_lines(uint32_t inval, uint8_t **lines, /
+disassemble	dasm.c	/^int disassemble(uint16_t instr, char *outstr, size/
+do_interp_continue	sim.c	/^int do_interp_continue(void)$/
+do_interp_goto	sim.c	/^int do_interp_goto(int argc, char *argv[])$/
+do_interp_load	sim.c	/^int do_interp_load(int argc, char *argv[])$/
+do_interp_read	sim.c	/^int do_interp_read(int argc, char *argv[])$/
+do_interp_reset	sim.c	/^int do_interp_reset(int argc, char *argv[])$/
+do_interp_show	sim.c	/^int do_interp_show(int argc, char *argv[])$/
+do_interp_step	sim.c	/^int do_interp_step(int argc, char *argv[])$/
+do_interp_trace	sim.c	/^int do_interp_trace(int argc, char *argv[])$/
+find_offset	asm.c	/^int find_offset(char *find, labeldec_t *labels)$/
+find_reloff	asm.c	/^int find_reloff(size_t cur_off, char *find, labeld/
+generate_labels	asm.c	/^void generate_labels($/
+generate_opcodes	asm.c	/^int generate_opcodes($/
+gpreg_read	sim_core.c	/^uint16_t gpreg_read(sim_core_state_t *state, unsig/
+gpreg_write	sim_core.c	/^void gpreg_write(sim_core_state_t *state, unsigned/
+instr_fmt_t	instructions.c	/^} instr_fmt_t;$/
+instr_spec_t	instr_table.h	/^} instr_spec_t;$/
+interpret	sim.c	/^int interpret(char *cmdstr)$/
+issymchar	asm.c	/^int issymchar(int c)$/
+labeldec_t	asm.c	/^typedef struct labeldec labeldec_t;$/
+linedec_t	asm.c	/^typedef struct linedec linedec_t;$/
+load_file	sim_core_test.c	/^int load_file(char *path, char **data, size_t *dat/
+mux_lines	sim_utils.c	/^void mux_lines(uint8_t **lines, int nlines, uint32/
+nextsym	asm.c	/^int nextsym(char *line, char **sym, int (*valid)(i/
+nmemonic_syntax	instructions.c	/^int nmemonic_syntax($/
+parse_cli	asm.c	/^int parse_cli(int argc, char *argv[], struct cli_o/
+parse_inputdesc	sim_core_test.c	/^int parse_inputdesc(char *desc, size_t desclen, si/
+parse_outputdesc	sim_core_test.c	/^int parse_outputdesc(char *desc, size_t desclen, s/
+parse_statedesc	sim_core_test.c	/^int parse_statedesc(char *desc, size_t desclen, si/
+print_input	sim.c	/^void print_input(sim_core_input_t *input)$/
+print_mem_state	sim.c	/^void print_mem_state(sim_memif_state_t *state)$/
+print_output	sim.c	/^void print_output(sim_core_output_t *output)$/
+print_state	sim.c	/^void print_state(sim_core_state_t *state)$/
+print_timer_state	sim.c	/^void print_timer_state(sim_cp_timer_state_t *timer/
+read_eq_semicolon_pair	sim_core_test.c	/^int read_eq_semicolon_pair($/
+read_input_desc	sim_core_test.c	/^int read_input_desc(char *path, sim_core_input_t */
+read_output_desc	sim_core_test.c	/^int read_output_desc(char *path, sim_core_output_t/
+read_state_desc	sim_core_test.c	/^int read_state_desc(char *path, sim_core_state_t */
+readline	asm.c	/^int readline(int fd, char *buf, unsigned int bufma/
+reset	sim.c	/^void reset(void)$/
+reset_core	sim.c	/^void reset_core(void)$/
+reset_mem	sim.c	/^void reset_mem(void)$/
+resolve_nmemonic	instructions.c	/^int resolve_nmemonic($/
+run_case	instructions_test.c	/^void run_case(int i)$/
+sim_core_cp_input_t	sim_core.h	/^} sim_core_cp_input_t;$/
+sim_core_cp_output_t	sim_core.h	/^} sim_core_cp_output_t;$/
+sim_core_exec	sim_core.c	/^int sim_core_exec($/
+sim_core_input_init	sim_core.c	/^sim_core_input_t *sim_core_input_init($/
+sim_core_input_t	sim_core.h	/^} sim_core_input_t;$/
+sim_core_mem_input_t	sim_core.h	/^} sim_core_mem_input_t;$/
+sim_core_mem_output_t	sim_core.h	/^} sim_core_mem_output_t;$/
+sim_core_output_init	sim_core.c	/^sim_core_output_t *sim_core_output_init($/
+sim_core_output_t	sim_core.h	/^} sim_core_output_t;$/
+sim_core_state_init	sim_core.c	/^sim_core_state_t *sim_core_state_init($/
+sim_core_state_t	sim_core.h	/^} sim_core_state_t;$/
+sim_core_update	sim_core.c	/^int sim_core_update($/
+sim_cp_timer_access	sim_cp_timer.c	/^void sim_cp_timer_access($/
+sim_cp_timer_init	sim_cp_timer.c	/^void sim_cp_timer_init($/
+sim_cp_timer_state_t	sim_cp_timer.h	/^} sim_cp_timer_state_t;$/
+sim_memif_access	sim_memif.c	/^void sim_memif_access($/
+sim_memif_init	sim_memif.c	/^void sim_memif_init($/
+sim_memif_state_t	sim_memif.h	/^} sim_memif_state_t;$/
+sim_memif_tick	sim_memif.c	/^void sim_memif_tick(sim_memif_state_t *mem_state)$/
+sim_physmem_io_setup_data	sim_physmem.c	/^void sim_physmem_io_setup_data(sim_physmem_io_t *p/
+sim_physmem_io_t	sim_physmem.h	/^} sim_physmem_io_t;$/
+sim_physmem_tick	sim_physmem.c	/^int sim_physmem_tick(sim_physmem_io_t *io)$/
+split	sim.c	/^int split(char *str, char *seps, bool zerolen,$/
+splitline	asm.c	/^int splitline(char *line, linedec_t *split)$/
+status_rfi	sim_core.c	/^void status_rfi(uint16_t *stat)$/
+status_trap	sim_core.c	/^void status_trap(uint16_t *stat)$/
+strchrs	sim.c	/^char *strchrs(char *str, char *chars, bool endmatc/
+testcase_t	instructions_test.c	/^} testcase_t;$/
+tokenize	asm.c	/^int tokenize(int infd, linedec_t **lines_head, lin/
+unset_run_sim	sim.c	/^void unset_run_sim(int arg)$/
+update_propagate_signals	sim_core.c	/^static void update_propagate_signals($/
+usage	asm.c	/^void usage(char *progname)$/

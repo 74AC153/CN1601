@@ -1,0 +1,12 @@
+assembler directives:
+
+[label:] .data <value>; -- 16 bit data declaration
+[label:] .org <offset>; -- offset delcaration
+
+[label:] operation;
+
+@label    -- full 16 bit address of label
+@label.hi -- high 8 bits of label
+@label.lo -- low 8 bits of label
+#immed  -- immediate
+

@@ -1,0 +1,42 @@
+resetting core state to power-on values
+clearing memory
+reading test_00.asm.bin
+5 words loaded at offset 0x0
+setting pc to 0x0000
+> setting pc to 0x0000
+> running 10 cycles
+> *** STATE ***
+pc=0005
+s7=0000 s6=0000 s5=0000 s4=0000 s3=0000 s2=1111 s1=8888 s0=9999 
+r7=0000 r6=0000 r5=0000 r4=0000 r3=0000 r2=0000 r1=0000 r0=0000 
+epc=0000 epc_s=0000
+swiarg=0000 ru_s=0 ll=0 ru=0 gie=0 um=0
+ifhdl=0000 dfhdl=0000 swihdl=0000 illhdl=0000 prvhdl=0000
+exinthdl[7..0]: 0000 0000 0000 0000 0000 0000 0000 0000 
+ ienable[7..0]: 0 0 0 0 0 0 0 0 
+ipending[7..0]: 0 0 0 0 0 0 0 0 
+    iack[7..0]: 0 0 0 0 0 0 0 0 
+  umcpen[7..0]: 0 0 0 0 0 0 0 0 
+counter hi=0000 lo=000a
+inter regnum=0 regval=9999
+inter swiarg=0000 ru_s=0 ll=0 ru=0 gie=0 um=0
+inter nextpc=0005
+inter instr_stall: false data_stall: false
+inter type: GPRUP
+*** OUTPUT ***
+ data value=0000 addr=0000 read=false req=false
+instr value=0000 addr=0005 read=true  req=true 
+copoc sel=0 op=none
+
+user mode: false
+*** INPUT ***
+  data value=0000 valid=false fault=false
+ instr value=0028 valid=true  fault=false
+coproc value=0000
+exint_sig[7..0]: 0 0 0 0 0 0 0 0 
+ll invalidate=false
+*** INSTR MEM ***
+delay=0 quiescent=true 
+*** DATA MEM ***
+delay=0 quiescent=true 
+> 

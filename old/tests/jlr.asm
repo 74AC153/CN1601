@@ -1,0 +1,12 @@
+inci r0, #6;
+jlr r0, #0;
+inci r1, #1;
+inci r1, #1;
+inci r1, #1;
+inci r1, #1;
+inci r1, #1;
+inci r1, #1;
+inci r1, #1;
+lui r2, #0xFF;
+ori r2, #0xFF;
+jr r2, #0;

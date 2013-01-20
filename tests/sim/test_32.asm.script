@@ -1,0 +1,10 @@
+cycle 22
+show
+show timer
+cycle 6
+show
+show timer
+cycle 8
+show
+show timer
+quit

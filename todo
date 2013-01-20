@@ -1,0 +1,80 @@
+add to spec: trap behavior table
+
+nail down external interrupt behavior spec -- (mid) reg, (mid) branch, (mid) mem, (mid) coproc, (mid) mode
+//memory faults don't cause interrupts in superuser mode -> software must check
+//add memory fault pending bits to IPEND register
+make adding modules easier using standardized module record
+add show coproc N
+add ability to get/set reg/state values in sim
+add reset pin
+//more regular output (1 line per item) in sim
+//replace literals with enum values in big sim_exec case statement
+remove exint_ack bus from spec (replace with coproc op
+make ordering of input/output/etc inside subroutines to cycle() consistent
+modify cpop to set bits on cp address bus too instead of wasting
+honor outbuflen in generate_opcodes
+
+update spec
+
+add hardware breakpoint?
+
+
+full command list taken from spim:
+quit
+load file offset
+run offset
+step num
+continue
+print {sN|uN|cN|mem addr|...}
+break addr
+delete addr
+list
+read addr
+disassemble addr
+write addr val
+assemble addr ...
+show
+
+changes {on|off}
+tracing {on|off}
+
+if we are in a memory delay slot and the address changes, we need to reset the delay counter?
+--> no, just use the original address
+
+
+
+onwared to code complete
+timer coprocessor
+sleep instruction
+eeprom coprocessor
+uart coprocessor
+forth interpreter
+mmu
+L0 cache
+
+gpregs: r#
+ctlregs: q#
+cpnum: c#
+cpreg: x#
+
+/* C style comments */
+// BCPL style ones too
+; assembler comments
+.data #,%,@
+.org #
+<label>:
+
+#: literal value
+%: relative label location to current
+@: absolte label location
+
+
+
+soon: 
+.data {#|%|@}/"string"
+
+
+
+
+
+

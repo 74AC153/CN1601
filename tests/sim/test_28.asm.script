@@ -1,0 +1,7 @@
+read 7 8
+cycle 11
+show
+cycle 5
+read 7 8
+show
+quit

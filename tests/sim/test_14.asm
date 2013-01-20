@@ -1,0 +1,3 @@
+li    r0, #0xD0
+shlli r0, #0x0D
+inci  r0, #0xFF

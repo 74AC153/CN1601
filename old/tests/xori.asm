@@ -1,0 +1,2 @@
+inci r0, #0x55;
+xori r0, #0xFF;

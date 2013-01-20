@@ -1,0 +1,3 @@
+	li r0, #0xca
+	shlli r0, #0xfe
+	orih r0, #0xaa

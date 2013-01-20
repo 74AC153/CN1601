@@ -1,0 +1,3 @@
+lui r0, #0x80;
+shli r0, #0x10;
+wshri r1, #0x1F;

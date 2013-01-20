@@ -1,0 +1,6 @@
+goto 0
+cycle 14
+show
+cycle 6
+show
+quit

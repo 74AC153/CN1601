@@ -1,0 +1,4 @@
+goto 0
+cycle 10
+show
+quit

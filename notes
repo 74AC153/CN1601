@@ -1,0 +1,52 @@
+ data movement based on instruction type:
+
+                                    side
+  type        read0  read1  aluout  write1
+  ====        =====  =====  ======  ======
+- math        gp     gp     gp      --      destreg
+- jmp         gp     --     pc      --
+- jmp+lnk     gp     pc     pc      r7      pc_r7
+- brch        --     pc     pc      --
+- brch+lnk    --     pc     pc      r7      pc_r7
+- cbrch       gp     pc     pc      --      
+- load        gp     mem    maddr   gp      mem_gp
+- store       gp     --     maddr   mem     gp_mem
+- cp read     --     cp     gp      --      destreg, cpaddr, cpsel, cpop
+- cp write    gp     --     cp      --      destreg, cpaddr, cpsel, cpop
+- cp op       gp     --     cpop    --      cpaddr, cpsel, cpdata, cpop
+- int         status --     status  --
+- rfi         status --     status  --
+- mfctl       ctl    --     gp      --
+- mtctl       gp     --     ctl     --
+
+
+
+- or nand and xor add sub addc subc shl shr shra shli shri shrai li shlli inci deci ori andi xori lhswp
+aluout->gp[destreg]
+
+- jr
+aluout->pc
+
+- jlr
+pc->r7
+aluout->pc
+
+- ba
+aluout->pc
+
+- bal
+pc->r7
+aluout->pc
+
+- bz bnz
+if aluargz/nz: aluout->pc 
+
+ll ldw
+stw sc
+mfcp
+mtcp
+cpop
+int
+rfi
+mfctl
+mtctl

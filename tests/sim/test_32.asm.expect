@@ -1,0 +1,123 @@
+resetting core state to power-on values
+clearing memory
+reading test_32.asm.bin
+16 words loaded at offset 0x0
+setting pc to 0x0000
+> running 22 cycles
+> *** STATE ***
+pc=000b
+s7=0000 s6=0000 s5=0000 s4=0000 s3=0001 s2=4000 s1=0006 s0=000d 
+r7=0000 r6=0000 r5=0000 r4=0000 r3=0000 r2=0000 r1=0000 r0=0000 
+epc=0000 epc_s=0000
+swiarg=0000 ru_s=0 ll=0 ru=0 gie=1 um=0
+ifhdl=0000 dfhdl=0000 swihdl=0000 illhdl=0000 prvhdl=0000
+exinthdl[7..0]: 0000 0000 0000 0000 0000 0000 0000 000d 
+ ienable[7..0]: 0 0 0 0 0 0 0 1 
+ipending[7..0]: 0 0 0 0 0 0 0 0 
+    iack[7..0]: 0 0 0 0 0 0 0 0 
+  umcpen[7..0]: 0 0 0 0 0 0 0 0 
+counter hi=0000 lo=0016
+inter regnum=6 regval=0000
+inter swiarg=0000 ru_s=0 ll=0 ru=0 gie=1 um=0
+inter nextpc=000b
+inter instr_stall: false data_stall: false
+inter type: BRANCH
+*** OUTPUT ***
+ data value=0000 addr=0000 read=false req=false
+instr value=0000 addr=000b read=true  req=true 
+copoc sel=0 op=none
+
+user mode: false
+*** INPUT ***
+  data value=0000 valid=false fault=false
+ instr value=d300 valid=true  fault=false
+coproc value=0000
+exint_sig[7..0]: 0 0 0 0 0 0 0 0 
+ll invalidate=false
+*** INSTR MEM ***
+delay=0 quiescent=true 
+*** DATA MEM ***
+delay=0 quiescent=true 
+> *** TIMER ***
+enabled: 1
+cycles_lo: 6
+cycles_hi: 0
+> running 6 cycles
+> *** STATE ***
+pc=000c
+s7=0000 s6=0002 s5=0000 s4=0000 s3=0001 s2=4000 s1=0006 s0=000d 
+r7=0000 r6=0000 r5=0000 r4=0000 r3=0000 r2=0000 r1=0000 r0=0000 
+epc=0000 epc_s=0000
+swiarg=0000 ru_s=0 ll=0 ru=0 gie=1 um=0
+ifhdl=0000 dfhdl=0000 swihdl=0000 illhdl=0000 prvhdl=0000
+exinthdl[7..0]: 0000 0000 0000 0000 0000 0000 0000 000d 
+ ienable[7..0]: 0 0 0 0 0 0 0 1 
+ipending[7..0]: 0 0 0 0 0 0 0 1 
+    iack[7..0]: 0 0 0 0 0 0 0 0 
+  umcpen[7..0]: 0 0 0 0 0 0 0 0 
+counter hi=0000 lo=001c
+inter regnum=6 regval=0002
+inter swiarg=0000 ru_s=0 ll=0 ru=0 gie=1 um=0
+inter nextpc=000c
+inter instr_stall: false data_stall: false
+inter type: GPRUP
+*** OUTPUT ***
+ data value=0000 addr=0000 read=false req=false
+instr value=0000 addr=000c read=true  req=true 
+copoc sel=0 op=none
+
+user mode: false
+*** INPUT ***
+  data value=0000 valid=false fault=false
+ instr value=3601 valid=true  fault=false
+coproc value=0000
+exint_sig[7..0]: 0 0 0 0 0 0 0 1 
+ll invalidate=false
+*** INSTR MEM ***
+delay=0 quiescent=true 
+*** DATA MEM ***
+delay=0 quiescent=true 
+> *** TIMER ***
+enabled: 0
+cycles_lo: 0
+cycles_hi: 0
+> running 8 cycles
+> *** STATE ***
+pc=0010
+s7=ffff s6=0002 s5=0000 s4=0000 s3=0001 s2=4000 s1=0006 s0=000d 
+r7=0000 r6=0000 r5=0000 r4=0000 r3=0000 r2=0000 r1=0000 r0=0000 
+epc=000c epc_s=0000
+swiarg=0000 ru_s=0 ll=0 ru=0 gie=0 um=0
+ifhdl=0000 dfhdl=0000 swihdl=0000 illhdl=0000 prvhdl=0000
+exinthdl[7..0]: 0000 0000 0000 0000 0000 0000 0000 000d 
+ ienable[7..0]: 0 0 0 0 0 0 0 1 
+ipending[7..0]: 0 0 0 0 0 0 0 0 
+    iack[7..0]: 0 0 0 0 0 0 0 0 
+  umcpen[7..0]: 0 0 0 0 0 0 0 0 
+counter hi=0000 lo=0024
+inter regnum=7 regval=ffff
+inter swiarg=0000 ru_s=0 ll=0 ru=0 gie=0 um=0
+inter nextpc=0010
+inter instr_stall: false data_stall: false
+inter type: GPRUP
+*** OUTPUT ***
+ data value=0000 addr=0000 read=false req=false
+instr value=0000 addr=0010 read=true  req=true 
+copoc sel=0 op=none
+
+user mode: false
+*** INPUT ***
+  data value=0000 valid=false fault=false
+ instr value=2fff valid=true  fault=false
+coproc value=0000
+exint_sig[7..0]: 0 0 0 0 0 0 0 0 
+ll invalidate=false
+*** INSTR MEM ***
+delay=0 quiescent=true 
+*** DATA MEM ***
+delay=0 quiescent=true 
+> *** TIMER ***
+enabled: 0
+cycles_lo: 0
+cycles_hi: 0
+> 

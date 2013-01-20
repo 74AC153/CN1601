@@ -1,0 +1,5 @@
+shlli r1, #0x88
+shlli r1, #0x88
+shlli r2, #0x11
+shlli r2, #0x11
+or r0, r1, r2

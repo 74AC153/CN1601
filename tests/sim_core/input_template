@@ -1,0 +1,16 @@
+data_value   = 0x0;
+data_valid   = 0x0;
+data_fault   = 0x0;
+instr_value  = 0x0;
+instr_valid  = 0x0;
+instr_fault  = 0x0;
+coproc_value = 0x0;
+exint_sig0   = 0x0;
+exint_sig1   = 0x0;
+exint_sig2   = 0x0;
+exint_sig3   = 0x0;
+exint_sig4   = 0x0;
+exint_sig5   = 0x0;
+exint_sig6   = 0x0;
+exint_sig7   = 0x0;
+ll_inval     = 0x0;

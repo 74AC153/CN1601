@@ -1,0 +1,9 @@
+inci r0, #6;
+jr r0, #0;
+inci r1, #1;
+inci r1, #1;
+inci r1, #1;
+inci r1, #1;
+inci r1, #1;
+inci r1, #1;
+inci r1, #1;

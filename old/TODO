@@ -1,0 +1,72 @@
+assembler:
+* convert assembler to line-by-line rather than semicolon-based
+* better syntax/error checking
+* better stdin/stdout handing
+* add line number output and immediate exit on syntax error
+* check for immediate overflow in
+  * branch offsets
+  * other places
+* add mode to dump out label locations
+- add cp_* nmemonic for coprocessor instruction handling with input file for resolution
+- clean up sourcecode
+* use getopt for cli args
+? complex constant expressions (+ - * / << >> | & ~)
+
+disassembler:
+* better stdin/stdout handing
+* add switches to begin dumping at a specified address for N instructions
+* add instruction word value for each line
+* use getopt for cli args
+
+simulator:
+* finish testing all opcodes
+* write automated tests for opcodes once all opcodes have been tested
+* write memory i/o and other logging
+- add branch/load delay slots
+- write interactive mode
+  - ctrl-C -- enter interactive mode
+
+  - x mem addr [len] -- print mem at address addr for [len] words
+  - x reg [N] -- print [register N] or all registers
+  - x ins [addr N] [num M] -- disassemble [starting at addr N] for [M] instructions
+
+  - b add reg N val V -- stop when register r has value v
+  - b add reg N chg -- stop when value in register r changes
+  - b add mem L val V -- stop when mem at location l has value V
+  - b add mem L chg -- stop when mem value at location L changs
+  - b add op M -- stop when instr with nmemonic M is executed
+  - b add ins M -- stop when exact instruction M is executed
+  - b lst -- list all breakpoints
+  - b del [N] -- remove [all] breakpoint[s]
+
+  - e ins L op -- assemble instruction and write to mem loc L
+  - e mem L V -- edit memory location
+  - e reg R V -- edit register value
+
+  - c -- continue execution
+  - s [N] -- step [N] instruction[s]
+
+  - h -- print help
+  - q -- quit
+- write some test programs
+  * primes
+  - fibo
+- add TLB interrupts, MMU, TLB
+- add user/supervisor modes
+- add external interrupts
+- add 4 serial ports
+- add GPIO
+- add timer interrupts
+- use getopt for cli args
+
+other:
+* fix tests for ldw/ll/stw/sc 
+- coalesce assembly/disassembly into opcodes.c
+- spec out primes.expect
+- finish fibo.asm
+- clean up opcodedecl_t to be more uniform
+- write out full spec
+- write GAS port
+- add "external memory" module
+- add "networking" module
+- write LLVM backend

@@ -1,0 +1,1520 @@
+===========================
+PART 1: CN16A Architecture
+===========================
+
+Overview:
+----------
+
+The CN1601 is a 16-bit harvard architecture RISC CPU. It has an external coprocessor interface for up to 8 coprocessors that are each assigned a dedicated interrupt pin. It has separate user/supervisor modes for which specific instructions may cause an exception if not executed in the right privilege level. There are no user-visible branch, load, or operand delay slots.
+
+
+Design Goals:
+--------------
+
+- Paged virtual memory support with an external TLB
+- Low latency interrupt handling
+- Simple RISC programming model
+
+
+Registers:
+-----------
+
+The CN1601 effectively has three separate register files: 8 user-mode general purpose registers, 8 supervisor-mode general purpose registers, and 32 control registers. The general purpose register files have dual read ports and a single write port.
+
+Independent of operating mode, the 8 general purpose registers associated with that mode are labeled R0 to R7. R7 is dual-purposed as a link register to hold a return address for subroutine calls. All other general purpose register usage is dependent on the runtime set up by the compiler/assembler. In the table below, labels in parentheses are recommended register usages.
+
+R0 -- (RET -- typically function return value)
+R1
+R2
+R3
+R4
+R5 -- (FP -- typically frame pointer)
+R6 -- (SP -- typically stack pointer)
+R7 -- LR -- Link Register
+PC -- Program Counter
+
+In addition to the registers listed above, there are also a number of control registers that are only accessible in supervisor mode that are used to set CPU behavior. They are described in the table below.
+
+C0 - U0         -RW- user-mode register file R0
+C1 - U1         -RW- user-mode register file R1
+C2 - U2         -RW- user-mode register file R2
+C3 - U3         -RW- user-mode register file R3
+C4 - U4         -RW- user-mode register file R4
+C5 - U5         -RW- user-mode register file R5
+C6 - U6         -RW- user-mode register file R6
+C7 - U7         -RW- user-mode register file R7
+C8 - EPC        -RW- address of the instruction to be resumed following an rfi instruction
+C9 - EPCSAVED   -RW- set to original value of EPC register during an intterupt.
+C10 - STATUS     -RW- processor status control register
+  bit: 15             8               0
+      [ M E U L S A A A A A A A A A A A ]
+     A - argument passed to last call of int instruction
+     S - return to user mode saved. FIXME: update rest of spec
+     L - load link bit.
+     U - return to user mode. if 1 an rfi instruction will set the cpu operating mode to user mode when run. If 0, an rfi instruction will keep the cpu in supervisor mode. Automatically set to the mode that the processor was in prior to an interrupt.
+     E - global interrupt enable bit. If 0, no interrupts will occur. Automatically set to 1 when an rfi instruction is executed.
+     M - processor in user mode. If 1, the processor is currently in user mode.
+C11 - IFAULTHDL -RW- address of entry point for instruction memory fault handler
+C12 - DFAULTHDL -RW- address of entry point for the data memory fault handler
+C13 - SWIHDL    -RW- address of entry point for software interrupt handler
+C14 - ILLOPHDL  -RW- address of entry point for illegal operation handler
+C15 - PRIVOPHDL -RW- address of entry point for priviledged op excep handler
+C16 - EXI0HDL   -RW- address of entry point for interrupt handler for coproc 0
+C17 - EXI1HDL   -RW- address of entry point for interrupt handler for coproc 1
+C18 - EXI2HDL   -RW- address of entry point for interrupt handler for coproc 2
+C19 - EXI3HDL   -RW- address of entry point for interrupt handler for coproc 3
+C20 - EXI4HDL   -RW- address of entry point for interrupt handler for coproc 4
+C21 - EXI5HDL   -RW- address of entry point for interrupt handler for coproc 5
+C22 - EXI6HDL   -RW- address of entry point for interrupt handler for coproc 6
+C23 - EXI7HDL   -RW- address of entry point for interrupt handler for coproc 7
+C24 - IENABLE   -RW- external interrupt enable register
+  bit: 15               7             0
+      [ _ _ _ _ _ _ _ _ H G F E D C B A ]
+
+     A - if 1, accept interrupts from source 0
+     B - if 1, accept interrupts from source 1
+     ...
+     H - if 1, accept interrupts from source 7
+C25 - IPEND     -R- interrupt pending register. The source for this register is effectively connected directly to the interrupt signal pins.
+  bit: 15               7             0
+      [ _ _ _ _ _ _ _ _ H G F E D C B A ]
+
+     A - if 1, interrupt pending from source 0
+     B - if 1, interrupt pending from source 1
+     ...
+     H - if 1, interrupt pending from source 7
+C26 - IACK      -W- interrupt acknowledge register. Used to acknowledge to the external device that the interrupt it has raised is being processed and it may de-assert its interrupt pin.
+  bit: 15               7             0
+      [ _ _ _ _ _ _ _ _ H G F E D C B A ]
+
+     A - if 1, acknowledge interrupt from source 0
+     B - if 1, acknowledge interrupt from source 1
+     ...
+     H - if 1, acknowledge interrupt from source 7
+C27 - UMCPEN    -RW- user-mode coprocessor enable register. This register determines whether or not a software trap will occur if a user-mode program executes a coprocessor operation targeting a specific coprocessor.
+  bit: 15               7             0
+      [ _ _ _ _ _ _ _ _ H G F E D C B A ]
+
+     A - if 1, enable user-mode access to coprocessor 0
+     B - if 1, enable user-mode access to coprocessor 1
+     ...
+     H - if 1, enable user-mode access to coprocessor 7
+C28 - COUNTER_LO   -R- CPU cycle counter low word. Increments each cycle.
+C29 - COUNTER_HI   -R- CPU cycle counter high word, Increments when COUNTER_LO overflows
+C30
+C31
+
+Instruction set overview:
+--------------------------
+Bitwise operations:
+  or, and, nor, xor -- 3 operand bitwise OR, AND, NOR, and XOR
+  andi, ori, nori, xori -- 1 operand + immediate bitwise OR, AND, NOR and XOR
+
+Arithmetic operations:
+  add, sub, uadd, usub -- 3 operand signed and unsigned add and subtract
+  inci, deci -- 1 operand + immediate increment and decrement
+
+Bitshift operations:
+  shl, shr, shra -- 3 operand left shift, right shift, and arithmetic right shift operations
+  shli, shri, shrai -- 1 operand + immediate left shift, right shift, and arithmetic right shift operations
+  lhswp -- register hi-half/low-half bit swap
+
+Branching:
+  ba, bal -- unconditional PC-relative branch and branch and link
+  bz, bnz -- conditional PC-relative branch on zero and nonzero
+  jr, jlr -- jump and jump and link to absolute register target
+
+Load/store operations:
+  li, shlli -- load immediate, shift-left-then-load-immediate
+  ldw, stw -- load word, store word
+  ll, sc -- load word linked, store word conditional
+
+Coprocessor & control registers:
+  mfcp, mtcp -- move from/to coprocessor register
+  cpop -- execute coprocessor operation
+  mfctl, mtctl -- move from/to control register
+
+Privilege control:
+  int -- software interrupt
+  rfi -- return from interrupt
+
+
+State changes between operating modes:
+---------------------------------------
+
+There are four ways the CN1601 can go into interrupt mode.
+
+1. Instruction fetch exception: memory fault on instruction memory fetch
+2. Sofware trap/exception: caused by the software interrupt instruction
+3. priviledged instruction or illegol instruction exceptions.
+4. Data memory exception: memory fault on data memory read or write
+5. External interrupt: external interrupts via the coprocessor interface.
+
+In all cases, when an interrupt is triggered, 
+- The global interrupt enable bit in the STATUS register is cleared
+- The processor is brought into supervisor mode if it was in user mode, with the associated UM bit in the STATUS register set.
+- The return to user mode bit in the STATUS register is set to 1 if the CPU was in user mode prior to handling the interrupt, and 0 if it was in supervisor mode.
+- The return to user mode saved bit in the STATUS register is set to the old value of the return to user mode bit prior to the interrupt.
+- The EPCSAVED control register is set to the value of the EPC control register.
+
+For mechanisms 1 and 4, which are related to the memory bus exceptions:
+- The address of the faulting instruction is placed in the EPC control register.
+- Any instructions already in flight preceding the faulting instruction are allowed to complete (and may even fault -- their faults will override the current fault).
+- Execution then continues at the addresses contained in the control registers IFAULTHDL or DFAULTHDL (for 1 and 3 respectively).
+
+For mechanism 2, which is related to software interrupts:
+- The address of the instruction following the interrupting instruction is placed in the EPC control register
+- Execution continues at the address contained by control register SWIHDL;
+
+For mechanism 3, which is related to illegal instructions:
+- the address of the faulting instruction is placed in the EPC control registers
+- Execution continues at the address contained by the control registers ILLOPHDL and PRIVOPHDL
+
+For mechanism 5, which is related to hardware interrupts:
+- The address of the instruction currently executing is saved in the EPC control register.
+- Execution continues at the address contained by the EXIHDL control register.
+
+Continuing where the cpu left off prior to an interrupt occurring is done using the rfi instruction. When it is executed, the following things happen:
+
+- If the return to user mode bit in the STATUS register is set to 1, the processor is put back into user mode.
+- The address contained by the EPC register is jumped to.
+- The control register EPCSAVED is copied to the EPC control register.
+- The return to user mode saved bit in the STATUS register is copied to the return to user mode bit.
+- The global interrupt enable bit in the STATUS register is set to 1.
+
+Note that following an rfi instruction invocation, if the resulting value of a bitwise-or between the IENABLE and IPEND registers is nonzero, the processor will immediately return to interrupt mode to process the pending interrupt(s). The interrupt handler that is jumped to will be the one corresponding to the leftmost bit that is set in the IPEND register.
+
+If the processor is already handling an interrupt, sets the IENABLE register to a nonzero value, and any corresponding bits in the IPEND register are set, the processor will immediately jump to the interrupt handler that the leftmost bit that is set corresponds to.
+
+
+Instruction set reference:
+---------------------------
+
+The CN1601 has 39 instructions spread over 31 major opcodes and 11 subcodes.
+
+Opcode summary:
+
+or     00000 dst xxx yyy 00
+nand   00000 dst xxx 000 01
+and    00000 dst xxx yyy 10
+xor    00000 dst xxx yyy 11
+add    00001 dst xxx yyy 00
+sub    00001 dst xxx yyy 01
+addc   00001 dst xxx yyy 10
+subc   00001 dst xxx yyy 11
+shl    00010 dst xxx yyy 00
+shr    00010 dst xxx yyy 01
+shra   00010 dst xxx yyy 10
+???    00010 ??? ??? ??? 11
+???    00011 ???????????
+li     00100 arg uuuuuuuu
+shlli  00101 arg uuuuuuuu
+inci   00110 arg uuuuuuuu
+deci   00111 arg uuuuuuuu
+ori    01000 arg uuuuuuuu
+andi   01001 arg uuuuuuuu
+xori   01010 arg uuuuuuuu
+shli   01011 arg 0000uuuu
+shri   01100 arg 0000uuuu
+shrai  01101 arg 0000uuuu
+lhswp  01110 arg 00000000
+ba     01111 ssssssssss
+bal    10000 ssssssssss
+bz     10001 tst ssssssss
+bnz    10010 tst ssssssss
+jr     10011 dst uuuuuuuu
+jlr    10100 dst uuuuuuuu
+ll     10101 dst adr sssss
+ldw    10110 dst adr sssss
+stw    10111 src adr sssss
+sc     11000 src adr sssss
+mfcp   11001 dst nnn uuuuu
+mtcp   11010 src nnn uuuuu
+cpop   11011 opr nnn 00000
+int    11100 uuuuuuuuuuu
+rfi    11101 00000000000
+mfctl  11110 dst 000uuuuu
+mtctl  11111 src 000uuuuu
+
+TODO:
+sync this with actual instr_table.c
+add sleep -- halt until next unmasked interrupt
+add brk -- for debugging
+
+
+Descriptions:
+
+Name: or / and / nor / xor
+Description: Bitwise Register OR / AND / NOR / XOR
+Type: OP3
+Format: (bit) 15      11 10       8 7        5 4        2 1          0
+        or:   [op=00000] [R_dest:3] [R_arg1:3] [R_arg2:3] [subcode:00]
+        and:  [op=00000] [R_dest:3] [R_arg1:3] [R_arg2:3] [subcode:01]
+        nor:  [op=00000] [R_dest:3] [R_arg1:3] [R_arg2:3] [subcode:10]
+        xor:  [op=00000] [R_dest:3] [R_arg1:3] [R_arg2:3] [subcode:11]
+Operation:
+	GPREG[R_dest] = GPREG[R_arg1] bitwise-(or/and/nor/xor) GPREG[R_arg2]
+	PC = PC + 1
+
+
+Name: add / sub
+Description: Signed Integer Register ADD / SUBTRACT
+Format: (bit) 15      11 10       8 7        5 4        2 1          0
+        add:  [op=00001] [R_dest:3] [R_arg1:3] [R_arg2:3] [subcode=00]
+        sub:  [op=00001] [R_dest:3] [R_arg1:3] [R_arg2:3] [subcode=01]
+Type: OP3
+Operation:
+	GPREG{R_dest] = GPREG[R_arg1] +/- GPREG[R_arg2]
+	PC = PC + 1
+
+
+Name: addc / subc
+Description: Check for carry with add or sub
+Format: (bit)  15      11 10       8 7        5 4        2 1          0
+        uadd:  [op=00001] [R_dest:3] [R_arg1:3] [R_arg2:3] [subcode=10]
+        usub:  [op=00001] [R_dest:3] [R_arg1:3] [R_arg2:3] [subcode=11]
+Type: OP3
+Operation:
+	if GPREG[R_arg1] +/- GPREG[R_arg2] overflows 
+		GPREG[R_dest] = 1
+	else
+		GPREG[R_dest] = 0
+	PC = PC + 1
+
+
+Name: shl / shr
+Description: left/right shift logical
+Format: (bit) 15      11 10       8 7        5 4        2 1          0
+        shl:  [op=00010] [R_dest:3] [R_arg1:3] [R_arg2:3] [subcode=00]
+        shr:  [op=00010] [R_dest:3] [R_arg1:3] [R_arg2:3] [subcode=01]
+Type: OP 3
+Operation:
+	GPREG[R_dest] = GPREG[R_arg1] (left/right shift by) GPREG[R_arg2]
+	PC = PC + 1
+
+
+Name: shra
+Description: right shift arithmetic
+Format: (bit) 15      11 10       8 7        5 4        2 1          0
+              [op=00010] [R_dest:3] [R_arg1:3] [R_arg2:3] [subcode=10]
+Type: OP3
+Operation:
+	GPREG[R_dest] = GPREG[R_arg1] arithmetic right shift by GPREG[R_arg2]
+	PC = PC + 1
+
+
+Name: li
+Description: clear and load immediate
+Format: (bit) 15      11 10       8 7     0
+              [op=00011] [R_targ:3] [val:8]
+Type: OP1
+Operation:
+                    15     8 7     0
+	GPREG[R_targ] = [zero:8] [val:8]
+	PC = PC + 1
+
+
+Name: shlli
+Description: shift left then load immediate
+Format: (bit) 15      11 10       8 7     0
+              [op=00100] [R_targ:3] [val:8]
+Type: OP1
+Operation:
+                    15                  8 7     0
+	GPREG[R_targ] = [GPREG[R_targ](7..0)] [val:8]
+	PC = PC + 1
+
+
+Name: inci / deci
+Description: increment / decrement by unsigned immediate
+Format: (bit) 15      11 10       8 7     0
+        inci: [op=00101] [R_targ:3] [val:8]
+        deci: [op=00110] [R_targ:3] [val:8]
+Type: OP1
+Operation:
+	GPREG[R_targ] = GPREG[R_targ] +/- val
+	PC = PC + 1
+
+
+Name: andi / ori / nori / xori
+Description: bitwise AND / OR / NOR / XOR with immediate
+Format: (bit) 15      11 10       8 7     0
+        andi: [op=00111] [R_targ:3] [val:8]
+        ori:  [op=01000] [R_targ:3] [val:8]
+        nori: [op=01001] [R_targ:3] [val:8]
+        xori: [op=01010] [R_targ:3] [val:8]
+Type: OP1
+Operation:
+	GPREG[R_targ](7..0) = [GPREG[R_targ](7..0) (and/or/nor/xor) val]
+	PC = PC + 1
+
+	High bits of GPREG[R_targ] are unaffected.
+
+
+Name: shli / shri
+Description: Logical shift left / right by immediate
+Format: (bit) 15      11 10       8 7    4 3     0
+        shli: [op=01011] [R_targ:3] [0000] [val:4]
+        shri: [op=01100] [R_targ:3] [0000] [val:4]
+Type: OP1
+Operation:
+	GPREG[R_targ] = GPREG[R_targ] (left/right shift by) val
+	PC = PC + 1
+
+
+Name: shrai
+Description: Arithmetic shift right by immediate
+Format: (bit) 15      11 10       8 7    4 3     0
+              [op=01101] [R_targ:3] [0000] [val:4]
+Type: OP1
+Operation:
+	GPREG[R_targ] = GPREG[R_targ] (arithmetic right shift by) val
+	PC = PC + 1
+
+
+Name: lhswp
+Description: low/high bit swap
+Format: (bit) 15      11 10       8 7        0
+              [op=01110] [R_targ:3] [00000000]
+Type: OP1
+Operation:
+	GPREG[R_targ] = [GPREG[R_targ](7..0)] [GPREG[R_targ](15..8)]
+	PC = PC + 1
+
+
+Name: ba
+Description: Unconditional PC-relative branch
+Format: (bit) 15      11 10       0
+              [op=01111] [b_off:11]
+Type: OP0
+Operation:
+	PC = PC + (sign extended) b_off
+
+
+Name: bal
+Description: Unconditional PC-relative branch with link
+Format: (bit) 15      11 10       0
+              [op=10000] [b_off:11]
+Type: OP0
+Operation:
+	GPREG[7] = PC + 1
+	PC = PC + (sign extended) b_off
+
+
+Name: bz / bnz
+Description: Conditional PC-relative branch when zero / nonzero
+Format: (bit) 15      11 10       8 7       0
+        bz:   [op=10001] [R_test:3] [b_off:8]
+        bnz:  [op=10010] [R_test:3] [b_off:8]
+Type: OP1
+Operation:
+	if GPREG[R_test] is zero / nonzero:
+		PC = PC + (sign extended) b_off
+	else
+		PC = PC + 1
+
+
+Name: jr
+Description: Jump absolute register signed offset
+Format: (bit) 15      11 10       8 7     0
+              [op=10011] [R_dest:3] [off:8]
+Type: OP1
+Operation:
+	PC = GPREG[R_dest] + (sign extended) off
+
+
+Name: jlr
+Description: Jump absolute register signed offset with link
+Format: (bit) 15      11 10       8 7     0
+              [op=10100] [R_dest:3] [off:8]
+Type: OP1
+Operation:
+	GPREG[7] = PC + 1
+	PC = GPREG[R_dest] + (sign extended) off
+
+
+Name: ldw
+Description: Load word and reset link state
+Format: (bit) 15      11 10      8 7        5 4     0
+              [op=10101] [R_val:3] [R_addr:3] [off:5]
+Type: OP2
+Operation:
+	LL = 1
+	DADDR = GPREG[R_addr] + (sign extended) off
+	DREAD = 1
+	DREQ = 1
+
+	while DVALID = 0 and DFAULT = 0
+		stall
+
+	if DVALID = 1
+		GPREG[R_val] = DVALI
+		DREAD = 0
+		DREQ = 0
+		PC = PC + 1
+	else
+		DREAD = 0
+		DREQ = 0
+		LL = 0
+		CTLREG[EPC] = PC
+		CTLREG[STATUS].U = CTLREG[STATUS].M
+		CTLREG[STATUS].M = 0
+		CTLREG[STATUS].E = 0
+		PC = CTLREG[DFAULTHDL]
+
+
+Name: stw
+Description: Store word and reset link state
+Format: (bit) 15      11 10      8 7        5 4     0
+              [op=10110] [R_val:3] [R_addr:3] [off:5]
+Type: OP2
+Operation:
+	LL = 0
+	DADDR = GPREG[R_addr] + (sign extended) off
+	DVALO = GPREG[R_val]
+	DREAD = 0
+	DREQ = 1
+
+	while DVALID = 0 and DFAULT = 0
+		stall
+
+	if DVALID = 1
+		DREAD = 0
+		DREQ = 0
+		PC = PC + 1
+	else
+		DREAD = 0
+		DREQ = 0
+		CTLREG[EPC] = PC
+		CTLREG[STATUS].U = CTLREG[STATUS].M
+		CTLREG[STATUS].M = 0
+		CTLREG[STATUS].E = 0
+		PC = CTLREG[DFAULTHDL]
+
+
+Name: sc
+Description: Store conditionally on link state
+Format: (bit) 15      11 10      8 7        5 4     0
+              [op=11000] [R_val:3] [R_addr:3] [off:5]
+Type: OP2
+Operation:
+
+	if LL = 0
+		GPREG[R_val] = 0
+		PC = PC + 1
+	else
+		DADDR = GPREG[R_addr] + (sign extended) off
+		DVAL = GPREG[R_val]
+		DREAD = 0
+		DREQ = 1
+
+		while DVALID = 0 and DFAULT = 0
+			stall
+
+		if DVALID = 1
+			DREAD = 0
+			DREQ = 0
+			GPREG[R_val] = 1
+			LL = 0
+			PC = PC + 1
+		else
+			DREAD = 0
+			DREQ = 0
+			CTLREG[EPC] = PC
+			CTLREG[STATUS].U = CTLREG[STATUS].M
+			CTLREG[STATUS].M = 0
+			CTLREG[STATUS].E = 0
+			PC = CTLREG[DFAULTHDL]
+
+
+Name: mfcp
+Description: load from coprocessor
+Format: (bit) 15      11 10       8 7       5 4       0
+              [op=11001] [R_dest:3] [cpnum:3] [cpreg:5]
+Type: OP2
+Operation:
+	if CTLREG[STATUS].m = 1 and CTLREG[UMCPEN].cpnum = 0
+		CTLREG[EPC] = PC
+		CTLREG[STATUS].U = CTLREG[STATUS].M
+		CTLREG[STATUS].M = 0
+		CTLREG[STATUS].E = 0
+		PC = CTLREG[ILLOPHDL]
+	else	
+		CSEL = cpnum
+		CADDR = cpreg
+		CPOP = 1 (read)
+		GPREG[R_dest] = CVALI
+
+	This instruction will trap if in user mode and the coprocessor is not
+	allowed to be used while in user mode.
+
+
+Name: mtcp
+Description: store to coprocessor
+Format: (bit) 15      11 10      8 7       5 4       0
+              [op=11010] [R_src:3] [cpnum:3] [cpreg:5]
+Type: OP2
+Operation:
+	if CTLREG[STATUS].m = 1 and CTLREG[UMCPEN].cpnum = 0
+		CTLREG[EPC] = PC
+		CTLREG[STATUS].U = CTLREG[STATUS].M
+		CTLREG[STATUS].M = 0
+		CTLREG[STATUS].E = 0
+		PC = CTLREG[ILLOPHDL]
+	else	
+		CSEL = cpnum
+		CADDR = cpreg
+		CPOP = 2 (write)
+		CVALO = GPREG[R_src]
+
+	This instruction will trap if in user mode and the coprocessor is not
+	allowed to be used while in user mode.
+
+
+Name: cpop
+Description: execute coprocessor operation
+Format: (bit) 15      11 10       8 7       5 4     0
+              [op=11011] [R_cpop:3] [cpnum:3] [00000]
+Type: OP1
+Operation:
+	if CTLREG[STATUS].m = 1 and CTLREG[UMCPEN].cpnum = 0
+		CTLREG[EPC] = PC
+		CTLREG[STATUS].U = CTLREG[STATUS].M
+		CTLREG[STATUS].M = 0
+		CTLREG[STATUS].E = 0
+		PC = CTLREG[ILLOPHDL]
+	else	
+		CSEL = cpnum
+		CADDR = 0
+		CPOP = 3 (execute)
+		CVALO = GPREG[R_src]
+
+	This instruction will trap if in user mode and the coprocessor is not
+	allowed to be used while in user mode.
+
+
+Name: int
+Description: software interrupt
+Format: (bit) 15      11 10     0
+              [op=11100] [arg:11]
+Type: OP0
+Operation:
+	CTLREG[EPC] = PC
+	CTLREG[STATUS].U = CTLREG[STATUS].M
+	CTLREG[STATUS].M = 0
+	CTLREG[STATUS].E = 0
+	CTLREG[STATUS].A = arg
+	PC = CTLREG[SWIHDL]
+
+
+Name: rfi
+Description: return from interrupt
+Format: (bit) 15      11 10          0
+              [op=11101] [00000000000]
+Type: OP0
+Operation:
+	if CTLREG[STATUS].M = 1
+		CTLREG[EPC] = PC
+		CTLREG[STATUS].U = CTLREG[STATUS].M
+		CTLREG[STATUS].M = 0
+		CTLREG[STATUS].E = 0
+		PC = CTLREG[ILLOPHDL]
+	else
+		CTLREG[STATUS].M = CTLREG[STATUS].U
+		CTLREG[STATUS].E = 1
+		PC = CTLREG[EPC]
+
+	This instruction will trap if called while in user mode
+
+
+Name: mfctl
+Description: move from control register
+Format: (bit) 15      11 10       8 7   5 4      0
+              [op=11110] [R_dest:3] [000] [cnum:5]
+Type: OP1
+Operation:
+	if CTLREG[STATUS].M = 1
+		CTLREG[EPC] = PC
+		CTLREG[STATUS].U = CTLREG[STATUS].M
+		CTLREG[STATUS].M = 0
+		CTLREG[STATUS].E = 0
+		PC = CTLREG[ILLOPHDL]
+	else
+		GPREG[R_dest] = CTLREG[cnum]
+		PC = PC + 1
+	
+	This instruction will trap if called while in user mode
+
+
+Name: mtctl
+Description: move to control register
+Format: (bit) 15      11 10      8 7   5 4      0
+              [op=11111] [R_src:3] [000] [cnum:5]
+Type: OP1
+Operation:
+	if CTLREG[STATUS].M = 1
+		CTLREG[EPC] = PC
+		CTLREG[STATUS].U = CTLREG[STATUS].M
+		CTLREG[STATUS].M = 0
+		CTLREG[STATUS].E = 0
+		PC = CTLREG[ILLOPHDL]
+	else
+		CTLREG[cnum] = GPREG[R_dest]
+		PC = PC + 1
+	
+
+	This instruction will trap if called while in user mode
+
+
+Data movement based on instruction type:
+----------------------------------------
+
+                          aluout  side
+type        read0  read1  write0  write1
+====        =====  =====  ======  ======
+math        gp     gp     gp      --
+jmp         gp     --     pc      --
+jmp+lnk     gp     pc     pc      r7
+brch        --     pc     pc      --
+brch+lnk    --     pc     pc      r7
+load        gp     mem    maddr   gp
+store       gp     --     maddr   mem
+cp read     --     cp     gp      --
+cp write    gp     --     cp      --
+cp op       gp     --     cpop    --
+int         status --     status  --
+rfi         status --     status  --
+mfctl       ctl    --     gp      --
+mtctl       gp     --     ctl     --
+
+
+Processor startup:
+------------------
+
+Immediately following a reset interrupt, the following things occur:
+- All registers are cleared to the value 0.
+- The program counter jumps to the memory address 0 and begins execution.
+It is the responsibility of the reset interrupt handler to initialize the processor.
+
+
+Sample Code:
+------------
+
+The following assembly language code implements an interrupt service routine for coprocessor interrupt 4 that can be nested. It saves state, handles the interrupt, and restores state.
+
+irq_coproc4:
+	; Save R0, R1, EPC, and STATUS.
+	; Ordered in such a way to minimize pipeline stalls.
+	deci SP, #4      ; make space
+	stw R0, SP, #0   ; save R0
+	stw R0, SP, #1   ; save R1
+	mfctl R0, EPC    ; load EPC
+	mfctl R1, STATUS ; load STATUS
+	stw R0, SP, #2   ; save EPC
+	stw R1, SP, #3   ; save STATUS
+
+	; Acknowledge the interrupt.
+	li R0, 0x8
+	mtctl R0, IACK
+
+	; Set the global interrupt enable bit in the STATUS register
+	; to allow nested interrupts (optional)
+	mfctl R0, STATUS
+	ori R0, #0x2
+	mtctl R0, STATUS
+
+	; At this point, our code is effectively "handling" the interrupt,
+	; 22 cycles following the jump to irq_coproc4 including operand stalls
+
+	; Do something here to handle the interrupt.
+	; In this case, we just count the number of interrupts
+	; received from external source 4. The counts vector is
+	; located at memory address 0xf00d, and we are incrementing
+	; offset 4 into it.
+	li R0, #0xf0
+	shlli R0, #0x0d
+	ldw R1, R0, #4
+	inci R1, #1
+	stw R1, R0, #4
+	
+	; reset the global interrupt enable bit in the STATUS register
+	; (only necessary if you enabled it previously)
+	mfctl R0, STATUS
+	andi R0, #0xFD
+	mtctl R0, STATUS
+
+	; restore EPC, STATUS, and registers
+	ldw R1, SP, #3 ; STATUS
+	ldw R0, SP, #2 ; EPC
+	mtctl R1, STATUS
+	ldw R1, SP, #1
+	mtctl R0, EPC
+	ldw R0, SP, #0
+	
+	; return from interrupt
+	rfi
+
+Note that if nested interrupts are not necessary, the handler is much shorter:
+
+irq_coproc4:
+	; Save R0, R1
+	deci SP, #2      ; make space
+	stw R0, SP, #0   ; save R0
+	stw R0, SP, #1   ; save R1
+
+	; Acknowledge the interrupt.
+	li R0, 0x8
+	mtctl R0, IACK
+
+	; At this point, our code is effectively "handling" the interrupt,
+	; 9 cycles after the jump to irq_coproc4 including operand stalls
+
+	li R0, #0xf0
+	shlli R0, #0x0d
+	ldw R1, R0, #4
+	inci R1, #1
+	stw R1, R0, #4
+	
+	; restore R0, R1
+	ldw R1, SP, #1
+	ldw R0, SP, #0
+	
+	; return from interrupt
+	rfi
+
+
+Pin Overview:
+-------------
+
+DVALO_0 ... DVALO_15: Data mem output value (out)
+DVALI_0 ... DVALI_15: Data mem input value (in)
+DADDR_0 ... DADDR_15: Data mem addr (out)
+DREAD:                Data mem read enable (out)
+DREQ:                 Data mem bus request (out)
+DVALID:               Data mem valid (in)
+DFAULT:               Data mem fault (in)
+DFACK:                Data mem fault acknowledge (out) FIXME: needed?
+IVAL_0 ... IVAL_15:   Instr mem value (in)
+IADDR_0 ... IADDR_15: Instr mem addr (out)
+IREQ:                 Instr mem request (out)
+IVALID:               Instr mem valid (in)
+IFAULT:               Instr mem fault (in)
+IFACK:                Instr mem fault acknowledge (out) FIXME: needed?
+CSEL_0 ... CSEL_2:    Coproc sel (out)
+CPOP_0 ... CPOP_1:    Coproc op (00 = noop, 01 = rd, 10 = wr`, 11 = ex) (out)
+CADDR_0 ... CADDR_4:  Coproc addr (out)
+CVALO_0 ... CVALO_15: Coproc out value (out)
+CVALI_0 ... CVALI_15: Coproc in value (in)
+INT_0 ... INT_7:      Interrupt signal (in)
+ACK_0 ... ACK_7:      Interrupt acknowledge (out)
+USER:                 In user mode (out)
+LLINVAL:              Invalidate LL bit (in)
+
+Memory interface:
+-----------------
+
+There are two memory interfaces for instruction and data memory that operate in parallel during processor operation. The instruction memory interface is read only.
+
+Generally, the mechanism that is used to notify the memory controller to perform a memory operation at a clock edge is the DREQ pin. The result of the operation is indicated at the next clock edge that either the DVALID or DFAULT pins are asserted.
+
+For a memory read operation, the following things are to happen in the specified order:
+
+1. The memory controller de-asserts the data mem valid / fault pins. The CPU is now free to issue a new memory read request.
+
+2. In parallel:
+   a. The CPU drives the desired memory read address on the data mem addr pins.
+   b. The CPU asserts the data mem read enable pin.
+
+3. The CPU asserts the data memory request pin. The memory controller is now free to begin a memory transaction.
+
+4. The memory controller places the requested data on the data mem input value pins
+
+5. The memory controller asserts the data mem valid/fault pin. The CPU is now free to end its memory read request.
+
+6. In parallel:
+   a. The CPU stops driving the data mem addr pins.
+   b. The CPU de-asserts the data mem read enable pin.
+
+7. The CPU de-asserts the data memory request pin. The memory controller is now free to finish its memory transaction.
+
+8. The memory controller stops driving the data mem input value pins
+
+Pictorially:
+
+        |--------|-------|--------|------
+DADDR   ____XXXXXXXXXXXXXXXXXX___________
+           (2a)             (6a) 
+             ________________
+DREAD   ____/                \___________
+           (2b)             (6b) 
+                  ________________
+DREQ    _________/                \______
+                (3)              (7)
+                          _______________
+DVALID  \________________/ 
+DFAULT (1)              (5)  
+
+DVALI   _____________XXXXXXXXXXXXXXXXXX__
+                    (4)              (8)
+
+For a memory write operation, the following things are to happen in the specified order:
+
+1. The memory controller de-asserts the data mem valid / fault pins. The CPU is now free to issue a new memory read request.
+
+2. In parallel:
+   a. The CPU drives the desired memory write address on the data mem addr pins.
+   b. The CPU drives the desired memory write value the data mem output value pins.
+
+3. The CPU asserts the data memory request pin. The memory controller is now free to begin a memory transaction.
+
+4. The memory controller asserts the data mem valid/fault pin. The CPU is now free to end its memory write request.
+
+5. In parallel:
+   a. The CPU stops driving the data mem addr pins.
+   b. The CPU stops driving the data mem output value pins.
+
+6. The CPU de-asserts the data memory request pin. The memory controller is now free to finish its memory transaction.
+
+Pictorially:
+
+        |--------|-------|--------|------
+DADDR   ____XXXXXXXXXXXXXXXXXX___________
+           (2a)             (5a) 
+                  ________________
+DREQ    _________/                \______
+                (3)              (6)
+                          _______________
+DVALID  \________________/ 
+DFAULT (1)              (4)  
+
+
+DVALO   ____XXXXXXXXXXXXXXXXXX___________
+           (2b)             (5b) 
+
+
+The memory i/o protocol is meant to be able to support both clocked and non-clocked mode. In non-clocked mode, the triggering events for communication are steps 3 and 5 for data read requests and steps 3 and 4 for data write requests. In clocked mode, clock edges must occur following the triggering steps mentioned above.
+
+
+Coprocessor Interface:
+----------------------
+
+There are three primary operations that can be done with connected coprocessors. Coprocessor read / write operations get / set the value of a register within the coprocessor. Coprocessor execute requests send an instruction to the coprocessor to be executed.
+
+Read and write requests are expected to "complete" before the following clock edge, meaning that the value to write need not be kept driven on the coprocessor output bus pins for more than one clock ege, and the coprocessor should return the requested read value to the CPU over the coprocessor input bus pins before the next rising clock edge.
+
+Execute operations also "complete" within one cycle, meaning that the CPU is able to "fire-and-forget" the operation during a single clock cycle. It is up to the coprocessor software interface as to how to signal that a particular operation has actually completed and the CPU can interpret the result.
+
+When issuing a coprocessor read to occur following a specific clock edge, the CPU will prior to that clock edge:
+- Set the coproc sel pins to identify the desired coprocessor
+- Set the coproc op pins to identify a read operation
+- Set the coproc addr pins to identify the desired register to read
+
+Prior to the subsequent clock edge, the coprocessor must then drive the coproc in value pins to the requested register's value.
+
+When issuing a coprocessor write to occur following a specific clock edge, the CPU will prior to that clock edge:
+- Set the coproc selt pins to identify the desired coprocessor
+- Set the coproc op pins to identify a write operation
+- Set the coproc addr pins to identify the desired register to read
+- Set the coproc out value pins to the desired value to write
+
+When issuing a coprocessor execute operation to occur following a specific clock edge, the CPU will prior to that clock edge:
+- Set the coproc selt pins to identify the desired coprocessor
+- Set the coproc op pins to identify an execute operation
+- Set the coproc out value pins to the desired instruction for the coprocessor to execute.
+
+Interrupt handling:
+-------------------
+
+To raise an interrupt for a particular source, assert the corresponding interrupt pin. This pin should be held asserted until the corresponding interrupt acknowledge pin is asserted by the CPU, otherwise it cannot be guaranteed that the interrupt has been serviced.
+
+The User Mode pin:
+------------------
+
+This pin will be asserted whenever the CPU is operating in user mode, and will be de-asserted when the CPU enters supervisor mode.
+
+The Load Link Invalidate pin:
+-----------------------------
+
+This pin should be asserted if any memory operations occur external to the CPU that should invalidate the load-link status. for the Store Conditional instruction.
+
+
+Stall / trap/execute behavior:
+------------------------------
+data stall: stall
+else...
+
+valid  request  pend   action
+-----  -------  ----   ------
+0      0        0      stall
+0      0        1      trap
+0      1        0      stall
+0      1        1      stall
+1      0        0      never reached
+1      0        1      never reached
+1      1        0      exec
+1      1        1      trap
+
+
+========================================
+PART 2: CN1601 Processor Implementation
+========================================
+
+Processor pipeline:
+--------------------
+
+- Instruction fetch (F)
+  - The address for the next instruction to be executed is placed on the instruction bus address lines.
+- Instruction decode (D)
+  - The instruction word is read from the instruction data bus.
+  - The opcode and operands are split out, and if necessary, the register file is read.
+- Execute / ALU (E)
+  - All logic and ALU functionality is contained here.
+- Memory read/write (M)
+  - The address and data lines on the data bus are set for load/store operations.
+- Register Write-back (W)
+  - The register file is written back from either the results of the ALU or the contents of memory.
+  - Except for the instruction bus address lines in the instruction fetch stage, this is the only stage that modifies processor/external pin state.
+
+
+Branch, operand, load, and control delays:
+------------------------------------------
+
+Branch Delays:
+
+Because the destination for a branch is not known until after the execute stage, there are a number of necessary branch delay slots for instructions that will get executed following a branch instruction. Note the diagram below where the instruction 'X' is the target instruction for the branch. '[]'s are no-op bubbles.
+
+Time   t=0    t=1   t=2   t=3   t=4   t=5
+Stage  Instr.
+Fetch  ba     F     []    []    []    X
+Dec    D      ba    []    []    []    []
+Exec   C      D     ba    []    []    []
+Mem    B      C     D     ba    []    []
+Write  A      B     C     D     ba    []
+
+In the above diagram, the instructions bz, bnz, jr, and jlr may be substituted for the ba instruction to produce identical behavior.
+
+Technically, it may be possible to update the PC when the ba, bz and bnz instructions leave the E stage (because they need to calculate the branch destination address). However, for the sake of consistency, those intructions are propagated fully through the pipeline.
+
+Although the need to calculate the branch destination is not necessary for the jlr operation, that instruction must propogate through the W stage because it writes R7. 
+
+The jr instruction behaves in the same way to simplify the pipeline control logic. 
+
+
+Operand delays:
+
+When there is a register dependency between instructions, a stall is required so that a previous instruction is able to update the register file before a subsequent one reads from it. The table below illustrates the behavior for the sequence
+
+add r3, r2, r1 ; r3 = r2 + r1 (instruction X)
+add r5, r4, r3 ; r5 = r4 + r3 (instruction Y)
+
+The stall is necessary because the contents of r3 will not be valid for instruction Y until instruction X reaches the R pipeline stage. Once instruction X reaches the R stage, instruction Y can proceed with its computation.
+
+Time   t=0    t=1   t=2   t=3   t=4   t=5
+Stage  Instr.
+F      X      Y     E     E     E     F 
+D      D      X     Y     Y     Y     E
+E      C      D     X     []    []    Y <-- once X is retired, Y can proceed.
+M      B      C     D     X     []    []
+W      A      B     C     D     X     []
+
+A similar issue arises following a load instruction. If a subsequent instruction's source operands depend on the result of the load, the processor must stall until that operand is available in the register file.
+
+
+Load delays:
+
+Because memory load and store oeprations happen on the last stage of the pipeline, if the memory is not able to provide the requested data within one cycle of the address being placed on the bus (from the M stage), the entire processor will stall until the memory performs the requested operation.
+
+
+Control delays:
+
+Due to the nature of the mtctl instruction modifying external processor state, the pipeline must be flushed following one.
+
+Interrupt handling:
+--------------------
+
+The following diagrams illustrate handling for each of the four ways that interrupt mode can be entered. Instruction 'X' in the diagrams below is the first instruction of the interrupt service routine.
+
+1. IF trap handling:
+
+If the IFAULT pin is asserted, the instruction that is currently in the IF stage is converted to one that is effectively a software interrupt instruction.
+
+In the diagram below, an instruction memory fault is raised for the address of instruction E (causing it to be notated [E]). Before the next clock cycle, the EPC register will hold the address of instruction E, which is the instruction that must be restarted when the CPU is brought out of interrupt context.
+
+Time       t=0     t=1     t=2     t=3     t=4     t=5
+Stage      Instr.
+F          [E]     []      []      []      []      X
+D          D       [E]     []      []      []      []
+E          C       D       [E]     []      []      []
+M          B       C       D       [E]     []      []
+W          A       B       C       D       [E]     []
+clock      |       |       |       |       |       |
+                   _ 
+IFAULT- ____/////// \\\\\\\__________________________
+           |       |       |       |       |       |
+      ______________________________________
+USER-                                       \\\\\\\__
+           |       |       |       |       |       |
+                                                   EPC=E
+
+
+2. Software trap/exception.
+
+Software interrupts are caused by the int instruction. Software exceptions are caused when the user attempts to execute an illegal operation, or if there is an arithmetic overflow when the add or sub instructions are in the EX stage. In both cases, execution will be resumed at the instruction following the trap instruction.
+
+Software interrupt/exception:
+
+Time       t=0     t=1     t=2     t=3     t=4     t=5
+Stage      Instr.
+F          INT     F       []      []      []      X
+D          D       INT     []      []      []      []
+E          C       D       INT     []      []      []
+M          B       C       D       INT     []      []
+W          A       B       C       D       INT     []
+clock      |       |       |       |       |       |
+     _______________________________________
+USER-                                       \\\\\\\_________
+           |       |       |       |       |       |
+                                                   EPC=INT+1
+
+ALU exception:
+
+Time       t=0     t=1     t=2     t=3
+Stage      Instr.
+F          E       []      []      X
+D          D       []      []      []
+E          [C]     []      []      []
+M          B       [C]     []      []
+W          A       B       [C]     []
+clock      |       |       |       |
+     _______________________
+USER-                       \\\\\\\__
+           |       |       |       |
+                           EPC=C+1
+
+
+
+3. MEM trap handling
+
+If the DFAULT pin is asserted, the instruction in the MR stage is replaced with a NOP* instruction, and all instructions in the earlier pipeline stages are invalidated by replacing them with normal NOPs.
+
+Time       t=0     t=1     t=2
+Stage      Instr.
+F          E       []      X
+D          D       []      []
+E          C       []      []
+M          [B]     []      []
+W          A       [B]     []
+clock      |       |       |
+                   _ 
+DFAULT- ____/////// \\\\\\\__
+           |       |       |
+     _______________
+USER-               \\\\\\\__
+           |       |       |
+                           EPC=B
+
+
+4. External interrupts
+
+External interrupts are triggered by the CINT_n pins which are hooked into the IPEND register. If the value of a bitwise-OR operation between the IPEND and IENABLE registers is nonzero, an external interrupt with be triggered. Because memory operations cannot be cancelled once started, (unless they cause a fault), the instructions in the M and W stages are allowed to complete.
+
+Time        t=0     t=1     t=2     t=3
+Stage       Instr.
+F           E       []      []      X
+D           D       []      []      []
+E           C       []      []      []
+M           B       [C]     []      []
+W           A       B       [C]     []
+clock       |       |       |       |
+                    _ 
+CINT_n- _____/////// \\\\\\\__________
+            |       |       |       |
+      _______________________
+USER-                        \\\\\\\__
+            |       |       |       |
+                                    EPC=C
+
+Interrupts only occur if there is an instruction in the execute stage of the pipeline. If for example, the CPU is performing a pipeline flush following an rfi instruction, interrupt handing via the mechanism described above will be delayed until an instruction reaches the execute stage.
+
+All things considered, the external interrupt handling latency is between 3 and 6 cycles.
+
+
+Returning from interrupts:
+---------------------------
+
+Transitioning back to user mode is accomplished by the 'rfi' instruction. Notice that when the rfi instruction leaves the decode stage, all pipeline states handling following instructions are cleared.
+
+Time        t=0     t=1     t=2     t=3     t=4     t=5
+Stage       Instr.
+F           rfi     F       []      []      []      X
+D           D       rfi     []      []      []      []
+E           C       D       rfi     []      []      []
+M           B       C       D       rfi     []      []
+W           A       B       C       D       rfi     []
+clock       |       |       |       |       |       |
+                                                    __
+USER- _______________________________________///////
+            |       |       |       |       |       |
+
+From the above diagram, note that there are some restrictions on where the rfi instruction can be placed in memory. It must not be placed at an address immediately preceding memory-mapped I/O lest the instruction bus making a request for the address of the following instruction accidentally perform an I/O operation.
+
+Interrupts only occur if there is a valid instruction in the CPU stage that is customarily saved into the EPC register for that kind of interrupt. For example, when returning from an interrupt, the CPU pipeline is effectively flushed following the execution of the rfi instruction. If the resulting bitwise-OR value of the IPEND and IENABLE register is nonzero following the 
+
+
+
+
+Memory Interface:
+------------------
+
+Data/instruction memory load:
+
+The following timing diagram illustrates the expected behavior of the memory controller for a memory load operation.
+
+Time      t=0     t=1     t=2     t=3     t=4     t=5     t=6
+Stage     Instr.
+F         ldw     F       G       H       I       J
+D         D       ldw     F       G       H       I
+E         C       D       ldw     F       G       H
+M         B       C       D       ldw     F       G
+W         A       B       C       D       ldw     F
+clock     |       |       |       |       |       |       |
+                                         __
+*ADDR  ............................//////  ..................
+          |       |       |       |       |       |       |
+                                          
+*WRITE ............................\\\\\\__..................
+          |       |       |       |       |       |       |
+                                         __
+*REQ ..............................//////  ..................
+          |       |       |       |       |       |       |
+                                                 __
+*VAL ......................................//////  ..........
+          |       |       |       |       |       |       |
+                                                 __
+*VALID ....................................//////  ..........
+          |       |       |       |       |       |       |
+
+What the diagram above explains is the following. A load word (lw) instruction is propagated through the instruction pipeline, and when it reaches the Memory/Register memory (M) and write-back (w) stages, the bulk of the operation is performed.
+
+When the memory operation reaches the M stage, before the following rising clock edge:
+  - The *ADDR pins must be set
+  - the *WRITE pin held low
+  - the *REQ pin held high
+
+Then on the following clock cycle, the memory must then:
+  - place the requested data on the *VAL pins
+  - hold the *VALID pin high
+
+However, there may be situations where the memory is unable to deliver the requested word before the next rising clock edge. In this case, the valid signal should be kept low, and the CPU will stall until the valid signal is set high during a rising clock edge. This is illustrated in the diagram below
+
+Time     t=4     t=5 ... t=N
+Stage    Instr
+F        I       I       J
+D        H       H       I
+E        G       G       H
+M        F       F       G
+W        ldw     ldw     F
+clock    |       |       |
+                        ____
+*VALID  ....____________
+         |       |       |
+
+Data memory store:
+
+Performing a store is similar to a load. A timing diagram is shown below:
+
+Time      t=0     t=1     t=2     t=3     t=4     t=5     t=6
+Stage     Instr.
+F         stw     F       G       H       I       J
+D         D       stw     F       G       H       I
+E         C       D       stw     F       G       H
+M         B       C       D       stw     F       G
+W         A       B       C       D       stw     F
+clock     |       |       |       |       |       |       |
+                                         __
+*ADDR  ............................//////  ..................
+          |       |       |       |       |       |       |
+                                         __
+*WRITE ............................//////  ..................
+          |       |       |       |       |       |       |
+                                         __
+*REQ ..............................//////  ..................
+          |       |       |       |       |       |       |
+*VAL ........................................................
+          |       |       |       |       |       |       |
+                                                 __
+*VALID ....................................//////  ..........
+          |       |       |       |       |       |       |
+
+As in the memory load situation, the entire CPU will stall until the *VALID signal is asserted.
+
+
+Coprocessor Interface:
+-----------------------
+
+The coprocessor interface accommodates functionality to perform the following operations:
+- writing to coprocessor registers
+- reading from coprocessor registers
+- executing coprocessor operations
+- signaling external hardware interrupts
+Below are timing diagrams for each of the above operations:
+
+CSEL_0 ... CSEL_2:    Coprocessor select (out)
+CREAD:                Coprocessor read (out)
+CWRITE:               Coprocessor write (out)
+CADDR_0 ... CADDR_4:  Coprocessor addr (out)
+CVAL_0 ... CVAL_15:   Coprocessor value (in/out)
+CINT_0 ... CINT_7:    Coprocessor interrupt (in)
+CACK_0 ... CACK_7:    Coprocessor interrupt acknowledge (out)
+
+mfcp   11001 dst nnn uuuuu
+mtcp   11010 src nnn uuuuu
+cpop   11011 opr 00000 nnn
+
+
+1. Writing to coprocessor registers: When the CPU requests a write into a coprocessor register, it must place the register number and register data on the CADDR_* and CVAL_* pins, and assert the CWRITE pin.
+
+Time      t=0     t=1
+Stage     Instr.
+F         E       F
+D         D       E
+E         C       D
+M         mtcp    C
+W         A       mtcp
+          |       |
+                 __
+CSEL_* ....//////  ...
+          |       |
+                 __
+CWRITE ....//////  ...
+          |       |
+                 __
+CADDR_* ...//////  ...
+          |       |
+                 __
+CVAL_* ....//////  ...
+          |       |
+
+2. Reading from coprocessor registers: When the CPU requests a read from a coprocessor register, it must place the register number on the CADDR_* pins, and assert the READ pin. AFter the next rising clock edge, the coprocessor must then place the requested data on the CVAL_* pins. The coprocessor must respond within 1 cycle, the CPU will not wait.
+
+Time      t=0     t=1     t=2
+Stage     Instr.
+F         E       F       G
+D         D       E       F
+E         C       D       E
+M         mtcp    C       D
+W         A       mtcp    C
+          |       |       |
+                 __
+CSEL_* ....//////  ......
+          |       |       |
+                 __
+CREAD  ....//////  ......
+          |       |       |
+                 __
+CADDR_* ...//////
+          |       |       |
+                         __
+CVAL_* ............//////
+          |       |       |
+
+3. Executing coprocessor operations: Requesting a coprocessor operation is similar to that of doing a write, except both the CREAD and CWRITE pins are asserted.
+
+4. Signalling external hardware interrupts: To describe the interrupt handling protocol, this section is an extension of the diagram listed in "Interrupt Handling" section 4.
+
+Time        t=0     t=1     t=2     t=3          t=n     t=n+1
+Stage       Instr.
+F           E       []      []      X            T       U
+D           D       []      []      []           S       T
+E           C       []      []      []           R       S
+M           B       [C]     []      []           Q       R
+W           A       B       [C]     []           mtcp    Q
+clock       |       |       |       |    ....    |       |       |
+                    __________________          __________
+CINT_n- _____///////                                      \\\\\\__...  
+            |       |       |       |    ....    |       |       |
+      _______________________
+USER-                        \\\\\\\__          __________________
+            |       |       |       |    ....    |       |       |
+                                    EPC=C
+                                                        __
+CACK_* ..............\\\\\\\______________________//////  .........
+            |       |       |       |    ....    |       |       |
+
+What is basically happening in the diagram above is that to signal a hardware interrupt, a coprocessor will assert its CINT_n pin and hold it high until the CACK_n pin is asserted.
+
+
+
+
+
+==========================
+PART 3: The Gory Details:
+==========================
+
+Register file:
+---------------
+
+The register file 
+
+Instruction Decoder:
+---------------------
+
+The output of the instruction decoder stage contains the following fields which are the inputs to the exec stage.
+
+OP3
+OP1u
+OP1u1
+OPs
+OP1s
+OP2s
+OP2sb
+OP2uc
+OP2ubc
+OPu
+OP1c
+                            fmt    alu? aluop dest  op1          op2               bus       cpnum   cpreg  
+or    00000 dst xxx yyy 00  OP3    1    0000  dst   regs[xxx]    regs[yyy]         0         0       0
+and   00000 dst xxx yyy 01  OP3    1    0001  dst   regs[xxx]    regs[yyy]         0         0       0
+nor   00000 dst xxx yyy 10  OP3    1    0010  dst   regs[xxx]    regs[yyy]         0         0       0
+xor   00000 dst xxx yyy 11  OP3    1    0011  dst   regs[xxx]    regs[yyy]         0         0       0
+add   00001 dst xxx yyy 00  OP3    1    0100  dst   regs[xxx]    regs[yyy]         0         0       0
+sub   00001 dst xxx yyy 01  OP3    1    0101  dst   regs[xxx]    regs[yyy]         0         0       0
+uadd  00001 dst xxx yyy 10  OP3    1    0110  dst   regs[xxx]    regs[yyy]         0         0       0
+usub  00001 dst xxx yyy 11  OP3    1    0111  dst   regs[xxx]    regs[yyy]         0         0       0
+shl   00010 dst xxx yyy 00  OP3    1    1000  dst   regs[xxx]    regs[yyy]         0         0       0
+shr   00010 dst xxx yyy 01  OP3    1    1001  dst   regs[xxx]    regs[yyy]         0         0       0
+shra  00010 dst xxx yyy 10  OP3    1    1010  dst   regs[xxx]    regs[yyy]         0         0       0
+rot   00010 dst xxx yyy 11  OP3    1    1011  dst   regs[xxx]    regs[yyy]         0         0       0
+
+li    00011 arg uuuuuuuu    OP1u   1    1100  arg   (regs[arg])  00000000uuuuuuuu  0         0       0
+shlli 00100 arg uuuuuuuu    OP1u   1    1101  arg   regs[arg]    00000000uuuuuuuu  0         0       0
+inci  00101 arg uuuuuuuu    OP1u   1    0100  arg   regs[arg]    00000000uuuuuuuu  0         0       0
+deci  00110 arg uuuuuuuu    OP1u   1    0101  arg   regs[arg]    00000000uuuuuuuu  0         0       0
+andi  00111 arg uuuuuuuu    OP1u1  1    0001  arg   regs[arg]    11111111uuuuuuuu  0         0       0
+ori   01000 arg uuuuuuuu    OP1u   1    0000  arg   regs[arg]    00000000uuuuuuuu  0         0       0
+nori  01001 arg uuuuuuuu    OP1u   1    1110  arg   regs[arg]    00000000uuuuuuuu  0         0       0
+xori  01010 arg uuuuuuuu    OP1u   1    0011  arg   regs[arg]    00000000uuuuuuuu  0         0       0
+shli  01011 arg 0000uuuu    OP1u   1    1000  arg   regs[arg]    000000000000uuuu  0         0       0
+shri  01100 arg 0000uuuu    OP1u   1    1001  arg   regs[arg]    000000000000uuuu  0         0       0
+shrai 01101 arg 0000uuuu    OP1u   1    1010  arg   regs[arg]    000000000000uuuu  0         0       0
+roti  01110 arg 0000uuuu    OP1u   1    1011  arg   regs[arg]    000000000000uuuu  0         0       0
+
+ba    01111 sssssssssss     OPs    1    0100  0     0            -----sssssssssss  0         0       0
+bal   10000 sssssssssss     OPs    1    0100  0     0            -----sssssssssss  0         0       0
+
+bz    10001 tst ssssssss    OP1s   1    0100  0     regs[tst]    --------ssssssss  0         0       0
+bnz   10010 tst ssssssss    OP1s   1    0100  0     regs[tst]    --------ssssssss  0         0       0
+jr    10011 dst ssssssss    OP1s   1    0100  0     regs[dst]    --------ssssssss  0         0       0
+jlr   10100 dst ssssssss    OP1s   1    0100  0     regs[dst]    --------ssssssss  0         0       0
+ 
+ldw   10101 dst adr sssss   OP2s   1    0100  dst   regs[adr]    -----------sssss  0         0       0
+
+stw   10110 src adr sssss   OP2sb  1    0100  0     regs[adr]    -----------sssss  regs[src] 0       0
+???   10111 ???
+sc    11000 src adr sssss   OP2sb  1    0100  0     regs[adr]    -----------sssss  regs[src] 0       0
+
+mfcp  11001 dst nnn uuuuu   OP2uc  0    0     dst   0            0                 0         nnn     uuuuu
+
+mtcp  11010 src nnn uuuuu   OP2ubc 0    0     0     0            0                 regs[src] nnn     uuuuu
+cpop  11011 opr nnn 00000   OP2ubc 0    0     0     0            0                 regs[opr] nnn     uuuuu
+
+int   11100 uuuuuuuuuuu     OPu    0    0     0     0            00000uuuuuuuuuuu  0         0       0
+rfi   11101 00000000000     OPu    0    0     0     0            0000000000000000  0         0       0
+
+mfctl 11110 dst 000 uuuuu   OP1c   0    0     dst   cregs[uuuuu] 0                 0         0       0
+mtctl 11111 src 000 uuuuu   OP1c   0    0     uuuuu regs[src]    0                 0         0       0
+
+
+Note that there is (very close but) not a direct 1:1 relationship between the instruction ALU operations and the ALU operations that are actually implemented. E.g., the nori instruction does not use any of the ALU operations that are avaialable to normal instructions due to the requirement that the bitwise logical immediate instructions not touch the upper 8 bits of the value passed.
+
+
+The instruction decode stage has the following architecture:
+
+   +------------------+
+   | instruction word |
+   +----+-------------+
+   |    |\             \
+   |    | +-------------+-------+
+   |    |                       |
+   +----+------------------+    |
+   | extract opcode        |    |
+   | select operand format |    |
+   +-----------------------+    |
+
+
+
+
+
+Arithmetic Logic Unit:
+-----------------------
+
+ALU operations:
+0000 bitwise or
+0001 bitwise and
+0010 bitwise nor
+0011 bitwise xor
+0100 add
+0101 subtract
+0110 unsigned add
+0111 unsigned subtract
+1000 left shift
+1001 right shift
+1010 right shift signed
+1011 rotate
+1100 set immediate
+1101 shift left 8 bits and bitwise or immediate
+1110 bitwise nor low 8 bits
+
+
+
+ALU Output:
+
+or     00000 dst xxx yyy 00    FMT_RRRS
+nand   00000 dst xxx 000 01    FMT_RR0S
+and    00000 dst xxx yyy 10    FMT_RRRS   
+xor    00000 dst xxx yyy 11    FMT_RRRS
+add    00001 dst xxx yyy 00    FMT_RRRS
+sub    00001 dst xxx yyy 01    FMT_RRRS
+addc   00001 dst xxx yyy 10    FMT_RRRS
+subc   00001 dst xxx yyy 11    FMT_RRRS
+shl    00010 dst xxx yyy 00    FMT_RRRS
+shr    00010 dst xxx yyy 01    FMT_RRRS
+shra   00010 dst xxx yyy 10    FMT_RRRS
+li     00100 arg uuuuuuuu      FMT_RU8
+shlli  00101 arg uuuuuuuu      FMT_RU8
+inci   00110 arg uuuuuuuu      FMT_RU8
+deci   00111 arg uuuuuuuu      FMT_RU8
+ori    01000 arg uuuuuuuu      FMT_RU8
+andi   01001 arg uuuuuuuu      FMT_RU8
+xori   01010 arg uuuuuuuu      FMT_RU8
+shli   01011 arg 0000uuuu      FMT_RU4
+shri   01100 arg 0000uuuu      FMT_RU4
+shrai  01101 arg 0000uuuu      FMT_RU4
+lhswp  01110 arg 00000000      FMT_R
+mfctl  11110 dst 000 ctl__     FMT_R0Q
+mtctl  11111 src 000 ctl__     FMT_R0Q
+--> update dest gp reg / ctlreg
+
+ba     01111 ssssssssss        FMT_S11
+bal    10000 ssssssssss        FMT_S11
+bz     10001 tst ssssssss      FMT_RS8
+bnz    10010 tst ssssssss      FMT_RS8
+jr     10011 dst 00000000      FMT_R
+jlr    10100 dst 00000000      FMT_R
+--> update PC
+
+ldw    10101 dst adr sssss     FMT_RRS5
+mfcp   11001 dst nnn uuuuu     FMT_RCX
+--> place addr on mem/coproc bus, update dest reg when done
+
+stw    10110 src adr sssss     FMT_RRS5
+sc     10111 src adr sssss     FMT_RRS5
+mtcp   11010 src nnn uuuuu     FMT_RCX
+cpop   11011 opr nnn 00000     FMT_RC
+--> place addr + data on mem/coproc bus
+
+int    11100 uuuuuuuuuuu       FMT_U11
+--> elevate priviledge
+
+rfi    11101 00000000000       FMT_NA
+--> descend priviledge
