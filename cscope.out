@@ -1,4 +1,4 @@
-cscope 15 $HOME/Documents/sourcecode/cpu/spec3               0000280716
+cscope 15 $HOME/Documents/sourcecode/cpu/spec3               0000288962
 	@asm.c
 
 1 
@@ -3738,7 +3738,7 @@ FMT_u3u8
 133 0x0E: 
 fmt
  = 
-FMT_u3_8
+FMT__11
 ; ;
 
 135 0x10: 
@@ -12351,17 +12351,17 @@ sim_c‹e_˝_ouçut_t
 	mc›roc
 ;
 
-69 
+67 
 boﬁ
  
 	mu£r_mode
 ;
 
-70 } 
+68 } 
 	tsim_c‹e_ouçut_t
 ;
 
-72 
+70 
 	#STATUS_GET_SWIARG
 (
 STAT
@@ -12369,7 +12369,7 @@ STAT
 
 	)
 
-73 
+71 
 	#STATUS_SET_SWIARG
 (
 STAT
@@ -12377,7 +12377,7 @@ STAT
 VAL
 ) \
 
-74 do{ (
+72 do{ (
 STAT
 Ë((STATË& 0xF800Ë| ((
 VAL
@@ -12385,7 +12385,7 @@ VAL
 
 	)
 
-76 
+74 
 	#STATUS_GET_UMSAVE
 (
 STAT
@@ -12393,7 +12393,7 @@ STAT
 
 	)
 
-77 
+75 
 	#STATUS_SET_UMSAVE
 (
 STAT
@@ -12401,7 +12401,7 @@ STAT
 VAL
 ) \
 
-78 do{ (
+76 do{ (
 STAT
 Ë((STATË& 0xF7FFË| (((
 VAL
@@ -12409,7 +12409,7 @@ VAL
 
 	)
 
-80 
+78 
 	#STATUS_GET_LL
 (
 STAT
@@ -12417,7 +12417,7 @@ STAT
 
 	)
 
-81 
+79 
 	#STATUS_SET_LL
 (
 STAT
@@ -12425,7 +12425,7 @@ STAT
 VAL
 ) \
 
-82 dÿ{ (
+80 dÿ{ (
 STAT
 Ë((STATË& 0xEFFFË| (((
 VAL
@@ -12433,7 +12433,7 @@ VAL
 
 	)
 
-84 
+82 
 	#STATUS_GET_RUMODE
 (
 STAT
@@ -12441,7 +12441,7 @@ STAT
 
 	)
 
-85 
+83 
 	#STATUS_SET_RUMODE
 (
 STAT
@@ -12449,7 +12449,7 @@ STAT
 VAL
 ) \
 
-86 dÿ{ (
+84 dÿ{ (
 STAT
 Ë((STATË& 0xDFFFË| (((
 VAL
@@ -12457,7 +12457,7 @@ VAL
 
 	)
 
-88 
+86 
 	#STATUS_GET_GIE
 (
 STAT
@@ -12465,7 +12465,7 @@ STAT
 
 	)
 
-89 
+87 
 	#STATUS_SET_GIE
 (
 STAT
@@ -12473,7 +12473,7 @@ STAT
 VAL
 ) \
 
-90 dÿ{ (
+88 dÿ{ (
 STAT
 Ë((STATË& 0xBFFFË| (((
 VAL
@@ -12481,7 +12481,7 @@ VAL
 
 	)
 
-92 
+90 
 	#STATUS_GET_UM
 (
 STAT
@@ -12489,7 +12489,7 @@ STAT
 
 	)
 
-93 
+91 
 	#STATUS_SET_UM
 (
 STAT
@@ -12497,7 +12497,7 @@ STAT
 VAL
 ) \
 
-94 dÿ{ (
+92 dÿ{ (
 STAT
 Ë((STATË& 0x7FFFË| (((
 VAL
@@ -12505,13 +12505,13 @@ VAL
 
 	)
 
-98 
+96 
 uöt16_t
  
 	mpc
 ;
 
-99 
+97 
 uöt16_t
  
 	mg¥_su≥r
@@ -12519,7 +12519,7 @@ uöt16_t
 SIM_CORE_NUM_GPREGS
 ];
 
-101 
+99 
 uöt16_t
  
 	m¨øy
@@ -12527,7 +12527,7 @@ uöt16_t
 SIM_CORE_NUM_CTLREGS
 ];
 
-103 
+101 
 uöt16_t
  
 	mg¥_u£r
@@ -12535,55 +12535,55 @@ uöt16_t
 SIM_CORE_NUM_GPREGS
 ];
 
-104 
+102 
 uöt16_t
  
 	mïc
 ;
 
-105 
+103 
 uöt16_t
  
 	mïc_ßved
 ;
 
-106 
+104 
 uöt16_t
  
 	m°©us
 ;
 
-107 
+105 
 uöt16_t
  
 	miÁu…hdl
 ;
 
-108 
+106 
 uöt16_t
  
 	mdÁu…hdl
 ;
 
-109 
+107 
 uöt16_t
  
 	mswihdl
 ;
 
-110 
+108 
 uöt16_t
  
 	mûl›hdl
 ;
 
-111 
+109 
 uöt16_t
  
 	m¥iv›hdl
 ;
 
-112 
+110 
 uöt16_t
  
 	mexihdl
@@ -12591,231 +12591,231 @@ uöt16_t
 SIM_CORE_NUM_EXTINT
 ];
 
-113 
+111 
 uöt16_t
  
 	mõ«bÀ
 ;
 
-114 
+112 
 uöt16_t
  
 	mùíd
 ;
 
-115 
+113 
 uöt16_t
  
 	mück
 ;
 
-116 
+114 
 uöt16_t
  
 	mum˝í
 ;
 
-117 
+115 
 uöt16_t
  
 	mcou¡î_low
 ;
 
-118 
+116 
 uöt16_t
  
 	mcou¡î_high
 ;
 
-119 } 
+117 } 
 	m«med
 ;
 
-120 } 
+118 } 
 	m˘l
 ;
 
-121 
+119 
 boﬁ
  
 	m¶ìpög
 ;
 
-125 
+123 
 	mªgnum
 ;
 
-126 
+124 
 uöt16_t
  
 	mªgvÆ
 ;
 
-127 
+125 
 uöt16_t
  
 	m√w°©
 ;
 
-128 
+126 
 uöt16_t
  
 	m√xçc
 ;
 
-129 
+127 
 boﬁ
  
 	mö°r_°Æl
 ;
 
-130 
+128 
 boﬁ
  
 	md©a_°Æl
 ;
 
-132 
+130 
 	mGPRUP
 ,
 
-133 
+131 
 	mBRANCH
 ,
 
-134 
+132 
 	mBRLINK
 ,
 
-135 
+133 
 	mLOAD
 ,
 
-136 
+134 
 	mLOADLNK
 ,
 
-137 
+135 
 	mSTORE
 ,
 
-138 
+136 
 	mSCOND
 ,
 
-139 
+137 
 	mCTLUP
 ,
 
-140 
+138 
 	mCPREAD
 ,
 
-141 
+139 
 	mTRAP
 ,
 
-142 
+140 
 	mRFI
 ,
 
-143 
+141 
 	mSLEEP
 
 
-144 } 
+142 } 
 	mty≥
 ;
 
-145 } 
+143 } 
 	möãr
 ;
 
-148 
+146 
 boﬁ
  
 	måa˚
 ;
 
-149 } 
+147 } 
 	tsim_c‹e_°©e_t
 ;
 
-152 
+150 
 sim_c‹e_ouçut_t
  *
 sim_c‹e_ouçut_öô
 (
 
-153 
+151 
 sim_c‹e_ouçut_t
  *
 ouçut
 );
 
-155 
+153 
 sim_c‹e_öput_t
  *
 sim_c‹e_öput_öô
 (
 
-156 
+154 
 sim_c‹e_öput_t
  *
 öput
 );
 
-158 
+156 
 sim_c‹e_°©e_t
  *
 sim_c‹e_°©e_öô
 (
 
-159 
+157 
 sim_c‹e_°©e_t
  *
 °©e
 );
 
-161 
+159 
 sim_c‹e_exec
 (
 
-162 
+160 
 sim_c‹e_°©e_t
  *
 °©e
 ,
 
-163 
+161 
 sim_c‹e_ouçut_t
  *
 ouçut
 ,
 
-164 
+162 
 sim_c‹e_öput_t
  *
 öput
 );
 
-166 
+164 
 sim_c‹e_upd©e
 (
 
-167 
+165 
 sim_c‹e_°©e_t
  *
 °©e
 ,
 
-168 
+166 
 sim_c‹e_ouçut_t
  *
 ouçut
 ,
 
-169 
+167 
 sim_c‹e_öput_t
  *
 öput
@@ -15876,6 +15876,978 @@ c‹e_ouçut
 571 
 	}
 }
+
+	@sim_cp_nvram.c
+
+1 
+	~<°dio.h
+>
+
+2 
+	~<î∫o.h
+>
+
+3 
+	~<°rög.h
+>
+
+4 
+	~<f˙é.h
+>
+
+5 
+	~<sys/mm™.h
+>
+
+6 
+	~<sys/°©.h
+>
+
+8 
+	~"sim_˝_nvøm.h
+"
+
+10 #i‡! 
+deföed
+(
+NOTRACE
+)
+
+11 
+	#TRACE
+(
+STATE
+, ...Ëdo{if((STATE)->
+åa˚
+)
+	`¥ötf
+–
+__VA_ARGS__
+ );}0)
+
+	)
+
+12 
+	#TRACEBLOCK
+(
+°©e
+, 
+BLOCK
+Ëdo{if((
+STATE
+)->
+åa˚
+ËBLOCK}0)
+
+	)
+
+14 
+	#TRACE
+(
+STATE
+, ...)
+
+	)
+
+15 
+	#TRACEBLOCK
+(
+°©e
+, 
+BLOCK
+)
+
+	)
+
+18 
+	$sim_˝_nvøm_öô
+(
+
+19 
+sim_˝_nvøm_°©e_t
+ *
+nvøm_°©e
+,
+
+20 *
+d©a_∑th
+,
+
+21 
+˝num
+)
+
+23 
+°©
+ 
+sb
+;
+
+25 
+nvøm_°©e
+->
+d©afd
+ = 
+	`›í
+(
+d©a_∑th
+, 
+O_RDWR
+);
+
+26 if(
+nvøm_°©e
+->
+d©afd
+ < 0) {
+
+27 
+	`Ârötf
+(
+°dîr
+, "nvram:Érror open %s: %s (errno=%d)\n",
+
+28 
+d©a_∑th
+, 
+	`°ªº‹
+(
+î∫o
+),Érrno);
+
+31 if(
+	`f°©
+(
+nvøm_°©e
+->
+d©afd
+, &
+sb
+) < 0) {
+
+32 
+	`Ârötf
+(
+°dîr
+, "nvram:Érror stat %s: %s (errno=%d)\n",
+
+33 
+d©a_∑th
+, 
+	`°ªº‹
+(
+î∫o
+),Érrno);
+
+36 
+nvøm_°©e
+->
+d©Æí
+ = 
+sb
+.
+°_size
+;
+
+37 
+nvøm_°©e
+->
+d©a
+ = 
+	`mm≠
+(
+NULL
+,Çvøm_°©e->
+d©Æí
+,
+
+38 
+PROT_READ
+ | 
+PROT_WRITE
+, 0,
+
+39 
+nvøm_°©e
+->
+d©afd
+, 0);
+
+40 if(
+nvøm_°©e
+->
+d©a
+ =
+MAP_FAILED
+) {
+
+41 
+	`Ârötf
+(
+°dîr
+, "nvram:Érror mmap %s: %s (errno=%d)\n",
+
+42 
+d©a_∑th
+, 
+	`°ªº‹
+(
+î∫o
+),Érrno);
+
+46 
+nvøm_°©e
+->
+˝num
+ = cpnum;
+
+47 
+nvøm_°©e
+->
+åa˚
+ = 
+Ál£
+;
+
+50 
+	}
+}
+
+52 
+	$sim_˝_nvøm_ac˚ss
+(
+
+53 
+sim_c‹e_öput_t
+ *
+c‹e_öput
+,
+
+54 
+sim_c‹e_ouçut_t
+ *
+c‹e_ouçut
+,
+
+55 
+sim_˝_nvøm_°©e_t
+ *
+nvøm_°©e
+)
+
+58 if(
+nvøm_°©e
+->
+dñay
+) {
+
+59 
+	`TRACE
+(
+nvøm_°©e
+, "nvøm: dñay %d\n",Çvøm_°©e->
+dñay
+);
+
+60 
+nvøm_°©e
+->
+dñay
+--;
+
+63 if(
+c‹e_ouçut
+->
+c›roc
+.
+£À˘
+ !
+nvøm_°©e
+->
+˝num
+) {
+
+67 
+c‹e_ouçut
+->
+c›roc
+.
+›
+) {
+
+68 
+COPROC_OP_READ
+:
+
+69 
+	`TRACE
+(
+nvøm_°©e
+, "nvram:ÑeadÑeg %d\n",
+
+70 
+c‹e_ouçut
+->
+c›roc
+.
+addr
+);
+
+71 
+c‹e_öput
+->
+c›roc
+.
+vÆue
+ =
+
+72 
+nvøm_°©e
+->
+ªgs
+.
+¨øy
+[
+c‹e_ouçut
+->
+c›roc
+.
+addr
+];
+
+75 
+COPROC_OP_WRITE
+:
+
+76 
+	`TRACE
+(
+nvøm_°©e
+, "nvram: writeÑeg %d\n",
+
+77 
+c‹e_ouçut
+->
+c›roc
+.
+addr
+);
+
+78 if(
+c‹e_ouçut
+->
+c›roc
+.
+addr
+ == 0) {
+
+80 
+	`TRACE
+(
+nvøm_°©e
+, "nvram:Ñeg %d isÑead only\n",
+
+81 
+c‹e_ouçut
+->
+c›roc
+.
+addr
+);
+
+84 
+nvøm_°©e
+->
+ªgs
+.
+¨øy
+[
+c‹e_ouçut
+->
+c›roc
+.
+addr
+] =
+
+85 
+c‹e_ouçut
+->
+c›roc
+.
+vÆue
+;
+
+88 
+COPROC_OP_EXEC
+:
+
+89 if(
+nvøm_°©e
+->
+dñay
+ != 0) {
+
+93 
+nvøm_°©e
+->
+ö°_≥nd
+) {
+
+94 
+CP_NVRAM_INSTR_READ
+:
+
+95 
+	`TRACE
+(
+nvøm_°©e
+, "nvram:ÉxecÑeadáddr %x\n",
+
+96 
+nvøm_°©e
+->
+addr_≥nd
+);
+
+97 
+nvøm_°©e
+->
+ªgs
+.
+«med
+.
+vÆ
+ =
+
+98 ((
+uöt16_t
+*)
+nvøm_°©e
+->
+d©a
+)[nvøm_°©e->
+addr_≥nd
+];
+
+99 
+nvøm_°©e
+->
+ªgs
+.
+«med
+.
+°©us
+ = 
+NVRAM_STATUS_READ_OK
+;
+
+100 
+nvøm_°©e
+->
+ö°_≥nd
+ = 
+CP_NVRAM_INSTR_NOOP
+;
+
+103 
+CP_NVRAM_INSTR_WRITE
+:
+
+104 
+	`TRACE
+(
+nvøm_°©e
+, "nvram:Éxec writeáddr %x = %x\n",
+
+105 
+nvøm_°©e
+->
+addr_≥nd
+,Çvøm_°©e->
+vÆ_≥nd
+);
+
+106 ((
+uöt16_t
+*)
+nvøm_°©e
+->
+d©a
+)[nvøm_°©e->
+addr_≥nd
+] =
+
+107 
+nvøm_°©e
+->
+vÆ_≥nd
+;
+
+108 
+nvøm_°©e
+->
+ªgs
+.
+«med
+.
+°©us
+ = 
+NVRAM_STATUS_WRITE_OK
+;
+
+109 
+nvøm_°©e
+->
+ö°_≥nd
+ = 
+CP_NVRAM_INSTR_NOOP
+;
+
+117 
+c‹e_ouçut
+->
+c›roc
+.
+vÆue
+) {
+
+118 
+uöt32_t
+ 
+addr
+;
+
+119 
+addr
+ = 
+nvøm_°©e
+->
+ªgs
+.
+«med
+.
+addr_lo
+ +
+
+120 (
+nvøm_°©e
+->
+ªgs
+.
+«med
+.
+addr_hi
+ << 16);
+
+121 
+CP_NVRAM_INSTR_READ
+:
+
+122 if(
+nvøm_°©e
+->
+ªgs
+.
+«med
+.
+°©us
+ !
+NVRAM_STATUS_IDLE
+) {
+
+123 
+	`TRACE
+(
+nvøm_°©e
+, "nvram: queueÑead butÇot idle\n");
+
+126 
+	`TRACE
+(
+nvøm_°©e
+, "nvram: queueÑead\n");
+
+127 
+nvøm_°©e
+->
+ö°_≥nd
+ = 
+CP_NVRAM_INSTR_READ
+;
+
+128 
+nvøm_°©e
+->
+addr_≥nd
+ = 
+addr
+;
+
+131 
+CP_NVRAM_INSTR_WRITE
+:
+
+132 if(
+nvøm_°©e
+->
+ªgs
+.
+«med
+.
+°©us
+ !
+NVRAM_STATUS_IDLE
+) {
+
+133 
+	`TRACE
+(
+nvøm_°©e
+, "nvram: queue writebutÇot idle\n");
+
+136 
+	`TRACE
+(
+nvøm_°©e
+, "nvram: queue write\n");
+
+137 
+nvøm_°©e
+->
+ö°_≥nd
+ = 
+CP_NVRAM_INSTR_WRITE
+;
+
+138 
+nvøm_°©e
+->
+addr_≥nd
+ = 
+addr
+;
+
+139 
+nvøm_°©e
+->
+vÆ_≥nd
+ =Çvøm_°©e->
+ªgs
+.
+«med
+.
+vÆ
+;
+
+142 
+CP_NVRAM_INSTR_ACK
+:
+
+143 
+	`TRACE
+(
+nvøm_°©e
+, "nvram:áck\n");
+
+144 
+nvøm_°©e
+->
+ªgs
+.
+«med
+.
+°©us
+ = 
+NVRAM_STATUS_IDLE
+;
+
+155 
+	}
+}
+
+157 
+	$sim_˝_nvøm_deöô
+(
+
+158 
+sim_˝_nvøm_°©e_t
+ *
+nvøm_°©e
+)
+
+160 
+	`munm≠
+(
+nvøm_°©e
+->
+d©a
+,Çvøm_°©e->
+d©Æí
+);
+
+161 
+	`˛o£
+(
+nvøm_°©e
+->
+d©afd
+);
+
+162 
+	}
+}
+
+	@sim_cp_nvram.h
+
+1 #i‚de‡
+SIM_CP_NVRAM_H
+
+
+2 
+	#SIM_CP_NVRAM_H
+
+
+	)
+
+4 
+	~<°döt.h
+>
+
+5 
+	~"sim_c‹e.h
+"
+
+8 
+	mCP_NVRAM_INSTR_NOOP
+,
+
+9 
+	mCP_NVRAM_INSTR_READ
+,
+
+10 
+	mCP_NVRAM_INSTR_WRITE
+,
+
+11 
+	mCP_NVRAM_INSTR_ACK
+,
+
+12 } 
+	t˝_nvøm_ö°r_t
+;
+
+14 
+	#NVRAM_STATUS_IDLE
+ 0
+
+	)
+
+15 
+	#NVRAM_STATUS_READ_PENDING
+ 1
+
+	)
+
+16 
+	#NVRAM_STATUS_READ_OK
+ 2
+
+	)
+
+17 
+	#NVRAM_STATUS_READ_ERR
+ 3
+
+	)
+
+18 
+	#NVRAM_STATUS_WRITE_PENDING
+ 4
+
+	)
+
+19 
+	#NVRAM_STATUS_WRITE_OK
+ 5
+
+	)
+
+20 
+	#NVRAM_STATUS_WRITE_ERR
+ 6
+
+	)
+
+22 
+	#NVRAM_CTL_READ_OK_INT
+ 0x1
+
+	)
+
+23 
+	#NVRAM_CTL_READ_ERR_INT
+ 0x2
+
+	)
+
+24 
+	#NVRAM_CTL_WRITE_OK_INT
+ 0x4
+
+	)
+
+25 
+	#NVRAM_CTL_WRITE_ERR_INT
+ 0x8
+
+	)
+
+29 
+uöt16_t
+ 
+	m¨øy
+[
+SIM_CORE_NUM_CPREGS
+];
+
+31 
+uöt16_t
+ 
+	m°©us
+;
+
+32 
+uöt16_t
+ 
+	m˘l
+;
+
+33 
+uöt16_t
+ 
+	maddr_lo
+;
+
+34 
+uöt16_t
+ 
+	maddr_hi
+;
+
+35 
+uöt16_t
+ 
+	mvÆ
+;
+
+36 } 
+	m«med
+;
+
+37 } 
+	mªgs
+;
+
+39 
+	m˝num
+;
+
+40 
+boﬁ
+ 
+	måa˚
+;
+
+42 *
+	md©a
+;
+
+43 
+size_t
+ 
+	md©Æí
+;
+
+44 
+	md©afd
+;
+
+46 
+	mdñay
+;
+
+47 
+˝_nvøm_ö°r_t
+ 
+	mö°_≥nd
+;
+
+48 
+uöt16_t
+ 
+	maddr_≥nd
+;
+
+49 
+uöt16_t
+ 
+	mvÆ_≥nd
+;
+
+50 } 
+	tsim_˝_nvøm_°©e_t
+;
+
+52 
+sim_˝_nvøm_öô
+(
+
+53 
+sim_˝_nvøm_°©e_t
+ *
+°©e
+,
+
+54 *
+d©a_∑th
+,
+
+55 
+˝num
+);
+
+57 
+sim_˝_nvøm_ac˚ss
+(
+
+58 
+sim_c‹e_öput_t
+ *
+c‹e_öput
+,
+
+59 
+sim_c‹e_ouçut_t
+ *
+c‹e_ouçut
+,
+
+60 
+sim_˝_nvøm_°©e_t
+ *
+nvøm_°©e
+);
+
+62 
+sim_˝_nvøm_deöô
+(
+
+63 
+sim_˝_nvøm_°©e_t
+ *
+nvøm_°©e
+);
 
 	@sim_cp_timer.c
 
@@ -24337,6 +25309,506 @@ size_t
 
 82 
 	g__END_DECLS
+
+
+	@/usr/include/sys/mman.h
+
+76 #i‚def 
+_SYS_MMAN_H_
+
+
+77 
+	#_SYS_MMAN_H_
+
+
+	)
+
+79 
+	~<sys/≠∂ópi›ts.h
+>
+
+80 
+	~<sys/cdefs.h
+>
+
+82 
+	~<sys/_ty≥s.h
+>
+
+88 #i‚def 
+_MODE_T
+
+
+89 
+__d¨wö_mode_t
+ 
+	tmode_t
+;
+
+90 
+	#_MODE_T
+
+
+	)
+
+93 #i‚de‡
+_OFF_T
+
+
+94 
+__d¨wö_off_t
+ 
+	toff_t
+;
+
+95 
+	#_OFF_T
+
+
+	)
+
+98 #i‚de‡
+_SIZE_T
+
+
+99 
+	#_SIZE_T
+
+
+	)
+
+100 
+__d¨wö_size_t
+ 
+	tsize_t
+;
+
+107 
+	#PROT_NONE
+ 0x00
+
+	)
+
+108 
+	#PROT_READ
+ 0x01
+
+	)
+
+109 
+	#PROT_WRITE
+ 0x02
+
+	)
+
+110 
+	#PROT_EXEC
+ 0x04
+
+	)
+
+116 
+	#MAP_SHARED
+ 0x0001
+
+	)
+
+117 
+	#MAP_PRIVATE
+ 0x0002
+
+	)
+
+118 #i‡!
+deföed
+(
+_POSIX_C_SOURCE
+Ë|| deföed(
+_DARWIN_C_SOURCE
+)
+
+119 
+	#MAP_COPY
+ 
+MAP_PRIVATE
+
+
+	)
+
+125 
+	#MAP_FIXED
+ 0x0010
+
+	)
+
+126 #i‡!
+deföed
+(
+_POSIX_C_SOURCE
+Ë|| deföed(
+_DARWIN_C_SOURCE
+)
+
+127 
+	#MAP_RENAME
+ 0x0020
+
+	)
+
+128 
+	#MAP_NORESERVE
+ 0x0040
+
+	)
+
+129 
+	#MAP_RESERVED0080
+ 0x0080
+
+	)
+
+130 
+	#MAP_NOEXTEND
+ 0x0100
+
+	)
+
+131 
+	#MAP_HASSEMAPHORE
+ 0x0200
+
+	)
+
+132 
+	#MAP_NOCACHE
+ 0x0400
+
+	)
+
+138 
+	#MCL_CURRENT
+ 0x0001
+
+	)
+
+139 
+	#MCL_FUTURE
+ 0x0002
+
+	)
+
+144 
+	#MAP_FAILED
+ ((*)-1Ë
+
+	)
+
+149 
+	#MS_ASYNC
+ 0x0001
+
+	)
+
+150 
+	#MS_INVALIDATE
+ 0x0002
+
+	)
+
+151 
+	#MS_SYNC
+ 0x0010
+
+	)
+
+153 #i‡!
+deföed
+(
+_POSIX_C_SOURCE
+Ë|| deföed(
+_DARWIN_C_SOURCE
+)
+
+154 
+	#MS_KILLPAGES
+ 0x0004
+
+	)
+
+155 
+	#MS_DEACTIVATE
+ 0x0008
+
+	)
+
+160 
+	#MAP_FILE
+ 0x0000
+
+	)
+
+161 
+	#MAP_ANON
+ 0x1000
+
+	)
+
+168 
+	#POSIX_MADV_NORMAL
+ 0
+
+	)
+
+169 
+	#POSIX_MADV_RANDOM
+ 1
+
+	)
+
+170 
+	#POSIX_MADV_SEQUENTIAL
+ 2
+
+	)
+
+171 
+	#POSIX_MADV_WILLNEED
+ 3
+
+	)
+
+172 
+	#POSIX_MADV_DONTNEED
+ 4
+
+	)
+
+174 #i‡!
+deföed
+(
+_POSIX_C_SOURCE
+Ë|| deföed(
+_DARWIN_C_SOURCE
+)
+
+175 
+	#MADV_NORMAL
+ 
+POSIX_MADV_NORMAL
+
+
+	)
+
+176 
+	#MADV_RANDOM
+ 
+POSIX_MADV_RANDOM
+
+
+	)
+
+177 
+	#MADV_SEQUENTIAL
+ 
+POSIX_MADV_SEQUENTIAL
+
+
+	)
+
+178 
+	#MADV_WILLNEED
+ 
+POSIX_MADV_WILLNEED
+
+
+	)
+
+179 
+	#MADV_DONTNEED
+ 
+POSIX_MADV_DONTNEED
+
+
+	)
+
+180 
+	#MADV_FREE
+ 5
+
+	)
+
+181 
+	#MADV_ZERO_WIRED_PAGES
+ 6
+
+	)
+
+182 
+	#MADV_FREE_REUSABLE
+ 7
+
+	)
+
+183 
+	#MADV_FREE_REUSE
+ 8
+
+	)
+
+184 
+	#MADV_CAN_REUSE
+ 9
+
+	)
+
+189 
+	#MINCORE_INCORE
+ 0x1
+
+	)
+
+190 
+	#MINCORE_REFERENCED
+ 0x2
+
+	)
+
+191 
+	#MINCORE_MODIFIED
+ 0x4
+
+	)
+
+192 
+	#MINCORE_REFERENCED_OTHER
+ 0x8
+
+	)
+
+193 
+	#MINCORE_MODIFIED_OTHER
+ 0x10
+
+	)
+
+198 
+__BEGIN_DECLS
+
+
+200 
+mlockÆl
+();
+
+201 
+mu∆ockÆl
+();
+
+203 
+mlock
+(c⁄° *, 
+size_t
+);
+
+204 #i‚de‡
+_MMAP
+
+
+205 
+	#_MMAP
+
+
+	)
+
+207 * 
+	$mm≠
+(*, 
+size_t
+, , , , 
+off_t
+Ë
+	`__DARWIN_ALIAS
+(
+mm≠
+);
+
+210 
+	$m¥Ÿe˘
+(*, 
+size_t
+, Ë
+	`__DARWIN_ALIAS
+(
+m¥Ÿe˘
+);
+
+212 
+	$msync
+(*, 
+size_t
+, Ë
+	`__DARWIN_ALIAS_C
+(
+msync
+);
+
+214 
+	`mu∆ock
+(c⁄° *, 
+size_t
+);
+
+216 
+	$munm≠
+(*, 
+size_t
+Ë
+	`__DARWIN_ALIAS
+(
+munm≠
+);
+
+218 
+	`shm_›í
+(const *, , ...);
+
+219 
+	`shm_u∆ök
+(const *);
+
+221 
+	`posix_madvi£
+(*, 
+size_t
+, );
+
+223 #i‡!
+	`deföed
+(
+_POSIX_C_SOURCE
+Ë|| deföed(
+_DARWIN_C_SOURCE
+)
+
+224 
+	`madvi£
+(*, 
+size_t
+, );
+
+225 
+	`möc‹e
+(c⁄° *, 
+size_t
+, *);
+
+226 
+	`möhîô
+(*, 
+size_t
+, );
+
+228 
+__END_DECLS
 
 
 	@/usr/include/sys/stat.h
@@ -49064,8 +50536,8 @@ Unknown
 .
 1
 /usr/include
-90
-2098
+93
+2152
 asm.c
 dasm.c
 instr_table.c
@@ -49077,6 +50549,8 @@ sim.c
 sim_core.c
 sim_core.h
 sim_core_test.c
+sim_cp_nvram.c
+sim_cp_nvram.h
 sim_cp_timer.c
 sim_cp_timer.h
 sim_memif.c
@@ -49101,6 +50575,7 @@ utils.h
 /usr/include/stdlib.h
 /usr/include/string.h
 /usr/include/strings.h
+/usr/include/sys/mman.h
 /usr/include/sys/stat.h
 /usr/include/sys/types.h
 /usr/include/sys/uio.h

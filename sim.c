@@ -10,6 +10,7 @@
 #include "sim_core.h"
 #include "sim_memif.h"
 #include "sim_cp_timer.h"
+#include "sim_cp_nvram.h"
 #include "utils.h"
 
 /******************************************
@@ -30,7 +31,8 @@ uint16_t physmem[PHYSMEM_NUMWORDS];
 
 #define TIMER_CPNUM 0
 sim_cp_timer_state_t timer_state;
-
+#define NVRAM_CPNUM 1
+sim_cp_nvram_state_t nvram_state;
 
 bool g_continue = true;
 
@@ -274,6 +276,7 @@ void cycle(void)
 	sim_core_exec(&core_state, &core_output, &core_input);
 	/* coprocessors */
 	sim_cp_timer_access(&core_input, &core_output, &timer_state);
+	
 	/* mem */
 	sim_memif_access(&(core_input.data), &(core_output.data), &dmem_state);
 	/* update */

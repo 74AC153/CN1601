@@ -63,8 +63,6 @@ typedef struct
 	sim_core_mem_output_t instr;
 
 	sim_core_cp_output_t coproc;
-	
-	//bool exint_ack[SIM_CORE_NUM_EXTINT];
 
 	bool user_mode;
 } sim_core_output_t;

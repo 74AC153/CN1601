@@ -1,10 +1,9 @@
+make adding coprocessor modules easier using standardized module record
+add show coproc N
 add to spec: trap behavior table
-
 nail down external interrupt behavior spec -- (mid) reg, (mid) branch, (mid) mem, (mid) coproc, (mid) mode
 //memory faults don't cause interrupts in superuser mode -> software must check
 //add memory fault pending bits to IPEND register
-make adding modules easier using standardized module record
-add show coproc N
 add ability to get/set reg/state values in sim
 add reset pin
 //more regular output (1 line per item) in sim
@@ -46,7 +45,7 @@ if we are in a memory delay slot and the address changes, we need to reset the d
 onwared to code complete
 timer coprocessor
 sleep instruction
-eeprom coprocessor
+nvram coprocessor
 uart coprocessor
 forth interpreter
 mmu

@@ -13,12 +13,23 @@ void sim_cp_timer_init(
 	sim_cp_timer_state_t *state,
 	unsigned int cpnum)
 {
+	state->cpnum = cpnum;
+}
+
+void sim_cp_timer_deinit(
+	sim_cp_timer_state_t *state)
+{
+	return;
+}
+
+void sim_cp_timer_reset(
+	sim_cp_timer_state_t *state)
+{
 	unsigned int i;
 	for(i = 0; i < sizeof(state->regs.array)/sizeof(state->regs.array[0]); i++)
 	{
 		state->regs.array[i] = 0;
 	}
-	state->cpnum = cpnum;
 }
 
 void sim_cp_timer_access(

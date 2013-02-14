@@ -31,6 +31,12 @@ void sim_cp_timer_init(
 	sim_cp_timer_state_t *state,
 	unsigned int cpnum);
 
+void sim_cp_timer_deinit(
+	sim_cp_timer_state_t *state);
+
+void sim_cp_timer_reset(
+	sim_cp_timer_state_t *state);
+
 void sim_cp_timer_access(
 	sim_core_input_t *core_input,
 	sim_core_output_t *core_output,

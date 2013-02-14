@@ -1518,3 +1518,58 @@ int    11100 uuuuuuuuuuu       FMT_U11
 
 rfi    11101 00000000000       FMT_NA
 --> descend priviledge
+
+
+
+Coprocessors:
+-------------
+
+Timer Coprocessor:
+------------------
+
+
+NVRAM Coprocessor:
+------------------
+registers:
+
+supported operations:
+
+read   0
+write  1
+ack    2
+
+reg 0: status
+reg 1: addr low
+reg 2: addr high
+reg 3: value
+
+status values:
+
+idle          0
+read pending  1
+read ok       2
+read error    3 -- e.g. out of bounds
+write pending 4
+write ok      5
+write error   6
+
+to perform read:
+1. set addr low and addr high registers
+2. send read operation. 
+3. status will contain read pending. wait for interrupt.
+4. if status == read ok: requested data is contained in value reg
+   if status == read error: bad address given
+5. send ack operation to clear interrupt assert
+
+to perform write:
+1. set addr low and addr high registers
+2. set value register
+3. send write operation. 
+4. status will contain write pending. wait for interrupt.
+5. if status == write ok: requested data has been written
+   if status == read error: bad address given
+6. send ack operation to clear interrupt assert
+
+
+UART Coprocessor:
+-----------------
