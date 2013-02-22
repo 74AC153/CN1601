@@ -2,8 +2,16 @@
 #include "sim_memif.h"
 
 #if ! defined(NOTRACE)
-#define TRACE(STATE, ...) do{if((STATE)->trace)printf( __VA_ARGS__ );}while(0)
-#define TRACEBLOCK(state, BLOCK) do{if((STATE)->trace) BLOCK}while(0)
+#define TRACE(STATE, LEVEL, ...) \
+	do{ \
+		if((STATE)->tracelevel & (LEVEL)) \
+			printf( __VA_ARGS__ ); \
+	} while(0)
+#define TRACEBLOCK(state, BLOCK) \
+	do{ \
+		if((STATE)->tracelevel & (LEVEL)) \
+			BLOCK \
+	} while(0)
 #else /* defined (NOTRACE) */
 #define TRACE(STATE, ...)
 #define TRACEBLOCK(state, BLOCK)
@@ -32,32 +40,32 @@ void sim_memif_access(
 
 	if(core_output->request) {
 		if(mem_state->quiescent) {
-			TRACE(mem_state, "mem %s: quiescent\n", mem_state->name);
+			TRACE(mem_state, 1, "mem %s: quiescent\n", mem_state->name);
 			mem_state->delay = MEMIF_DELAY;
 			mem_state->quiescent = false;
 		}
 		if(mem_state->delay) {
-			TRACE(mem_state, "mem %s: delay\n", mem_state->name);
+			TRACE(mem_state, 1, "mem %s: delay\n", mem_state->name);
 			mem_state->delay--;
 			return;
 		}
 	} else {
-		TRACE(mem_state, "mem %s: idle\n", mem_state->name);
+		TRACE(mem_state, 1, "mem %s: idle\n", mem_state->name);
 		return;
 	}
 
 	if(core_output->addr > mem_state->memlen) {
-		TRACE(mem_state, "mem %s: addr fault\n", mem_state->name);
+		TRACE(mem_state, 1, "mem %s: addr fault\n", mem_state->name);
 		core_input->valid = false;
 		core_input->fault = true;
 	} else if(core_output->read) {
 		core_input->value = mem_state->physmem[core_output->addr];
-		TRACE(mem_state, "mem %s: read addr %4.4x val %4.4x\n",
+		TRACE(mem_state, 1, "mem %s: read addr %4.4x val %4.4x\n",
 		      mem_state->name, core_output->addr, core_input->value);
 		core_input->valid = true;
 		core_input->fault = false;
 	} else {
-		TRACE(mem_state, "mem %s: write addr %4.4x val %4.4x\n",
+		TRACE(mem_state, 1, "mem %s: write addr %4.4x val %4.4x\n",
 		      mem_state->name, core_output->addr, core_output->value);
 		mem_state->physmem[core_output->addr] = core_output->value;
 		core_input->valid = true;

@@ -143,7 +143,7 @@ typedef struct
 	} inter;
 
 	/* miscellaneous control */
-	bool trace;
+	uint32_t tracelevel;
 } sim_core_state_t;
 
 
@@ -165,5 +165,10 @@ int sim_core_update(
 	sim_core_state_t *state,
 	sim_core_output_t *output,
 	sim_core_input_t *input);
+
+/* returns -1 if none pending, >0 for pending coproc */
+int sim_core_cp_op_pending(
+	coproc_op_t op,
+	sim_core_output_t *output);
 
 #endif

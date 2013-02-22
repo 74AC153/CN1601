@@ -14,7 +14,7 @@ typedef struct {
 	bool quiescent;
 
 	char *name;
-	bool trace;
+	uint32_t tracelevel;
 } sim_memif_state_t;
 
 void sim_memif_init(

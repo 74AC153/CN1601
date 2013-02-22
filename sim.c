@@ -6,6 +6,7 @@
 #include <signal.h>
 #include <string.h>
 #include <stdlib.h>
+#include <errno.h>
 
 #include "sim_core.h"
 #include "sim_memif.h"
@@ -25,14 +26,11 @@ sim_core_input_t core_input;
  **********************************/
 sim_memif_state_t dmem_state;
 sim_memif_state_t imem_state;
+
 #define PHYSMEM_NUMWORDS 65535
 uint16_t physmem[PHYSMEM_NUMWORDS];
 
-
-#define TIMER_CPNUM 0
 sim_cp_timer_state_t timer_state;
-#define NVRAM_CPNUM 1
-sim_cp_nvram_state_t nvram_state;
 
 bool g_continue = true;
 
@@ -44,37 +42,68 @@ void unset_run_sim(int arg)
 	g_continue = false;
 }
 
+sim_cp_info_t coproc_info[] = {
+	{
+		"timer",
+		"(no argugments)",
+		(sim_cp_state_hdr_t *) &timer_state, 
+		NULL, /*init*/
+		NULL, /*deinit*/
+		NULL, /*reset*/
+		timer_state_data,
+		timer_state_exec,
+		NULL, /*fetch*/
+		timer_state_print
+	},
+};
+/* FIXME: change this to NUM_COPROCS */
+#define ARRLEN(ARR) (sizeof(ARR) / sizeof(ARR[0]))
+
 typedef struct {
 	char *infile;
 	bool debug;
 	int startaddr;
 	int loadoff;
+	char *cparg[8];
 } cli_args_t;
 
 void usage(char *progname)
 {
-	printf("usage: %s [-i <image>] [-o <offset>] [-s <startaddr>] [-d]\n", 
+	unsigned int i;
+	printf("usage: %s [-i <img>] [-o <off>] [-s <start>] [-d] [-# <args>]\n", 
 	       progname);
-	printf("<offset> defaults to 0\n");
-	printf("<startaddr> defaults to 0\n");
+	printf("<img>: initial memory image, if not specified, -d implied\n");
+	printf("<off>: load offset for <img>, defaults to 0\n");
+	printf("<start>: starting PC address, defaults to 0\n");
 	printf("-d: start in command mode\n");
-	printf("if <image> is not specified, -d is implied\n");
+	printf("-# <args>: # from 0..%d, <args> comma delimited with no spaces\n",
+	       (int) ARRLEN(coproc_info) - 1);
+	for(i = 0; i < ARRLEN(coproc_info); i++) {
+		printf("coproc %d (%s) usage: %s\n",
+		       i, coproc_info[i].name, coproc_info[i].usage);
+	}
+	
 }
 
 int parse_cli(int argc, char *argv[], cli_args_t *args)
 {
 	int ch;
-	args->infile = NULL;
-	args->loadoff = 0;
-	args->startaddr = 0;
-	args->debug = false;
+	memset(args, 0, sizeof(*args));
 
-	while((ch = getopt(argc, argv, "i:o:s:d")) != -1) {
+	while((ch = getopt(argc, argv, "i:o:s:d0:1:2:3:4:5:6:7:")) != -1) {
 		switch(ch) {
 		case 'i': args->infile = optarg; break;
 		case 'o': args->loadoff = strtol(optarg, NULL, 0); break;
 		case 's': args->startaddr = strtol(optarg, NULL, 0); break;
 		case 'd': args->debug = true; break;
+		case '0': 
+		case '1':
+		case '2':
+		case '3':
+		case '4':
+		case '5':
+		case '6':
+		case '7': args->cparg[ch - '0'] = optarg; break;
 		default:
 			printf("error: unknown switch %c\n", ch);
 			usage(argv[0]);
@@ -211,14 +240,8 @@ void print_input(sim_core_input_t *input)
 
 void print_mem_state(sim_memif_state_t *state)
 {
-	printf("delay=%d quiescent=%s\n", state->delay, state->quiescent ? "true " : "false");
-}
-
-void print_timer_state(sim_cp_timer_state_t *timer_state)
-{
-	printf("enabled: %d\n", TIMER_CTL_GET_ENABLED(timer_state->regs.named.ctl));
-	printf("cycles_lo: %x\n", timer_state->regs.named.cycles_lo);
-	printf("cycles_hi: %x\n", timer_state->regs.named.cycles_hi);
+	printf("delay=%d quiescent=%s\n",
+	       state->delay, state->quiescent ? "true " : "false");
 }
 
 char *strchrs(char *str, char *chars, bool endmatch)
@@ -270,16 +293,51 @@ int split(char *str, char *seps, bool zerolen,
 
 void cycle(void)
 {
+	unsigned int i;
+	int status, cpnum;
+
 	/* fetch */
+	for (i = 0; i < ARRLEN(coproc_info); i++) {
+		if(coproc_info[i].fetch) {
+			/* FIXME: deal with errors here */
+			status = coproc_info[i].fetch(coproc_info[i].state);
+		}
+	}
+
 	sim_memif_access(&core_input.instr, &core_output.instr, &imem_state);
+
 	/* decode + exec */
 	sim_core_exec(&core_state, &core_output, &core_input);
-	/* coprocessors */
-	sim_cp_timer_access(&core_input, &core_output, &timer_state);
+
+	if(0 <= (cpnum = sim_core_cp_op_pending(COPROC_OP_EXEC, &core_output))) {
+		if(cpnum < (int) ARRLEN(coproc_info) && coproc_info[cpnum].exec) {
+			coproc_info[cpnum].exec(coproc_info[cpnum].state);
+		}
+	}
 	
 	/* mem */
+	for (i = 0; i < ARRLEN(coproc_info); i++) {
+		if(coproc_info[i].data) {
+			/* FIXME: deal with errors here */
+			status = coproc_info[i].data(coproc_info[i].state);
+		}
+	}
+
 	sim_memif_access(&(core_input.data), &(core_output.data), &dmem_state);
+
 	/* update */
+	if(0 <= (cpnum = sim_core_cp_op_pending(COPROC_OP_READ, &core_output))) {
+		if(cpnum < (int) ARRLEN(coproc_info)) {
+			sim_cp_read(coproc_info[cpnum].state);
+		}
+	}
+
+	if(0 <= (cpnum = sim_core_cp_op_pending(COPROC_OP_WRITE, &core_output))) {
+		if(cpnum < (int) ARRLEN(coproc_info)) {
+			sim_cp_write(coproc_info[cpnum].state);
+		}
+	}
+
 	sim_core_update(&core_state, &core_output, &core_input);
 }
 
@@ -299,11 +357,25 @@ void reset_mem(void)
 	memset(physmem, 0, sizeof(physmem));
 }
 
-void reset(void)
+/* FIXME: handle nonzero return values */
+int reset(void)
 {
-	sim_cp_timer_init(&timer_state, 0);
+	unsigned int i;
+	int status;
+	for(i = 0; i < ARRLEN(coproc_info); i++) {
+		sim_cp_hdr_reset(coproc_info[i].state);
+		if(!coproc_info[i].reset) {
+			continue;
+		}
+		if((status = coproc_info[i].reset(coproc_info[i].state))) {
+			printf("error: coproc %s (%d) reset failed (%d)\n",
+		           coproc_info[i].name, i, status);
+			return -1;
+		}
+	}
 	reset_core();
 	reset_mem();
+	return 0;
 }
 
 int do_interp_reset(int argc, char *argv[])
@@ -449,75 +521,92 @@ int do_interp_show(int argc, char *argv[])
 	} else if(strcmp(argv[0], "data") == 0) {
 		printf("*** DATA MEM ***\n");
 		print_mem_state(&dmem_state);
-	} else if(strcmp(argv[0], "timer") == 0) {
-		printf("*** TIMER ***\n");
-		print_timer_state(&timer_state);
 	} else {
-		printf("error: usage: show [state|output|input|instr|data|timer]\n");
+		unsigned int i;
+		for(i = 0; i < ARRLEN(coproc_info); i++) {
+			if(!strcmp(argv[0], coproc_info[i].name)) {
+				printf("*** COPROCESSOR: %s ***\n", coproc_info[i].name);
+				coproc_info[i].print(coproc_info[i].state);
+				break;
+			}
+		}
+		if(i == ARRLEN(coproc_info)) {
+			printf("error: usage: show [state|output|input|instr|data");
+			for(i = 0; i < ARRLEN(coproc_info); i++) {
+				printf("|%s", coproc_info[i].name);
+			}
+			printf("]\n");
+		}
 	}
 	return 0;
 }
 
 int do_interp_trace(int argc, char *argv[])
 {
-	bool s, i, d, timer;
-	s = core_state.trace;
-	d = dmem_state.trace;
-	i = imem_state.trace;
-	timer = timer_state.trace;
-	if(argc == 0) {
-		
-	} else if(argc == 1) {
-		if(!strcmp(argv[0], "on")) {
-			s = i = d = timer = true;
-		} else if(!strcmp(argv[0], "off")) {
-			s = i = d = timer = false;
-		} else if(!strcmp(argv[0], "state")) {
-			s = true;
-		} else if(!strcmp(argv[0], "imem")) {
-			i = true;
-		} else if(!strcmp(argv[0], "dmem")) {
-			d = true;
-		} else if(!strcmp(argv[0], "timer")) {
-			timer = true;
-		} else {
-			printf("unknown trace command: %s\n", argv[0]);
-			goto error;
-		}
-	} else if(argc == 2) {
-		if(strcmp(argv[1], "on") && strcmp(argv[1], "off")) {
-			printf("unknown trace command: %s\n", argv[1]);
-			goto error;
-		}
-		if(!strcmp(argv[0], "state")) {
-			s = strcmp(argv[1], "on") == 0;
-		} else if(!strcmp(argv[0], "imem")) {
-			i = strcmp(argv[1], "on") == 0;
-		} else if(!strcmp(argv[0], "dmem")) {
-			d = strcmp(argv[1], "on") == 0;
-		} else if(!strcmp(argv[0], "timer")) {
-			timer = strcmp(argv[1], "on");
-		} else {
-			printf("unknown trace command: %s\n", argv[0]);
-			goto error;
-		}	
-	} else {
-		goto error;
-	}
+	unsigned int i;
+	uint32_t level;
 
-	core_state.trace = s;
-	dmem_state.trace = d;
-	imem_state.trace = i;
-	timer_state.trace = timer;
-	printf("trace state=%d imem=%d dmem=%d timer=%d\n",
-	       s, i, d, timer);
+	switch(argc) {
+	default:
+		goto error;
+
+	case 0:
+		printf("core %8.8x\n", core_state.tracelevel);
+		printf("imem %8.8x\n", imem_state.tracelevel);
+		printf("dmem %8.8x\n", dmem_state.tracelevel);
+		for(i = 0; i < ARRLEN(coproc_info); i++) {
+			printf("%s %8.8x\n",
+			       coproc_info[i].name,
+			       coproc_info[i].state->tracelevel);
+		}
+		break;
+
+	case 2:
+		errno = 0;
+		level = strtol(argv[1], NULL, 0);
+		if(errno) {
+			printf("invalid tracelevel: %s\n", argv[1]);
+			goto error;
+		}
+
+		if(!strcmp(argv[0], "core")) {
+			core_state.tracelevel = level;
+			printf("core trace level set to %8.8x\n", core_state.tracelevel);
+		} else if(!strcmp(argv[0], "imem")) {
+			imem_state.tracelevel = level;
+			printf("imem trace level set to %8.8x\n", imem_state.tracelevel);
+		} else if(!strcmp(argv[0], "dmem")) {
+			dmem_state.tracelevel = level;
+			printf("dmem trace level set to %8.8x\n", dmem_state.tracelevel);
+		} else {
+			for(i = 0; i < ARRLEN(coproc_info); i++) {
+				if(! strcmp(coproc_info[i].name, argv[0])) {
+					coproc_info[i].state->tracelevel = level;
+					printf("%s trace level set to %8.8x\n",
+					       coproc_info[i].name,
+					       coproc_info[i].state->tracelevel);
+					break;
+				}
+			}
+			if(i == ARRLEN(coproc_info)) {
+				printf("unknown trace target: %s\n", argv[0]);
+				goto error;
+			}
+		}
+		break;
+	}
 
 	return 0;
 
 error:
-	printf("usage: trace {on | off}\n");
-	printf("             {state | imem | dmem | timer}\n");
-	printf("             {state | imem | dmem | timer} {on | off}\n");
+	printf("usage: trace\n");
+	printf("usage: trace [<target> <level>]\n");
+	printf("<target> is one of:\n");
+	printf("core\ndmem\nimem\n");
+	for(i = 0; i < ARRLEN(coproc_info); i++) {
+		printf("%s\n", coproc_info[i].name);
+	}
+	
 	return 0;
 }
 
@@ -586,8 +675,9 @@ int interpret(char *cmdstr)
 int main(int argc, char *argv[])
 {
 	int status;
+	unsigned int i;
 	cli_args_t args;
-	char linebuf[256];
+	char linebuf[256], lastline[256];
 	
 	/* read cli */
 
@@ -596,11 +686,35 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
+	/* setup coprocessor states */
+
+	for(i = 0; i < ARRLEN(coproc_info); i++) {
+#if 0
+		if(!coproc_info[i].init && args.cparg[i]) {
+			printf("error: coproc %s (%d) has no init callback\n",
+			       coproc_info[i].name, i);
+			return -1;
+		}
+#endif
+		sim_cp_hdr_init(coproc_info[i].state, i, args.cparg[i],
+		                &core_input, &core_output);
+		if(coproc_info[i].init) {
+			status = coproc_info[i].init(coproc_info[i].state);
+			if(status) {
+				printf("error: coproc %s (%d) init failed (%d)\n",
+			           coproc_info[i].name, i, status);
+				return -1;
+			}
+		}
+	}
+
 	/* initialize */
 
 	reset();
 
 	/* go */
+	memset(linebuf, 0, sizeof(linebuf));
+	memset(lastline, 0, sizeof(lastline));
 
 	if(args.infile) {
 		snprintf(linebuf, sizeof(linebuf), "load %s %d; goto %d;",
@@ -623,7 +737,12 @@ int main(int argc, char *argv[])
 		fgets(linebuf, sizeof(linebuf), stdin);
 		linebuf[sizeof(linebuf) - 1] = 0;
 		if(strchr(linebuf, '\n')) *strchr(linebuf, '\n') = 0;
+		if(strlen(linebuf) == 0) {
+			memcpy(linebuf, lastline, sizeof(linebuf));
+			printf("%s\n", linebuf);
+		}
 interp:
+		memcpy(lastline, linebuf, sizeof(lastline));
 		status = interpret(linebuf);
 	}
 

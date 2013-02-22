@@ -6,11 +6,11 @@
 #include <stdio.h>
 
 #if ! defined(NOTRACE)
-#define TRACE(STATE, ...) do{if((STATE)->trace)printf( __VA_ARGS__ );}while(0)
-#define TRACEBLOCK(STATE, BLOCK) do{if((STATE)->trace) BLOCK}while(0)
+#define TRACE(STATE, LEVEL, ...) do{if((STATE)->tracelevel & (LEVEL))printf( __VA_ARGS__ );}while(0)
+#define TRACEBLOCK(STATE, LEVEL, BLOCK) do{if((STATE)->tracelevel & (LEVEL) ) BLOCK}while(0)
 #else /* defined (NOTRACE) */
-#define TRACE(STATE, ...)
-#define TRACEBLOCK(STATE, BLOCK)
+#define TRACE(STATE, LEVEL ...)
+#define TRACEBLOCK(STATE, LEVEL, BLOCK)
 #endif
 
 sim_core_output_t *sim_core_output_init(
@@ -154,10 +154,10 @@ int sim_core_exec(
 	uint16_t alu_arg0, alu_arg1;
 	alu_op_t alu_op;
 
-	TRACE(state, "core: exec pc %x\n", state->pc);
+	TRACE(state, 1, "core: exec pc %x\n", state->pc);
 	/* check for data stalls */
 	if(state->inter.data_stall) {
-		TRACE(state, "core: exec data stall\n");
+		TRACE(state, 1, "core: exec data stall\n");
 		return 0;
 	}
 
@@ -167,12 +167,12 @@ int sim_core_exec(
 
 	/* check for sleep state */
 	if(state->sleeping) {
-		TRACE(state, "core: exec sleeping\n");
+		TRACE(state, 1, "core: exec sleeping\n");
 		/* trap on pending hardware interrupts */
 		i = check_pending_interrupt(state, input);
 		if(i >= 0) {
 			state->inter.nextpc = state->ctl.named.exihdl[i];
-			TRACE(state, "core: exec pending interrupt %d\n", i);
+			TRACE(state, 1, "core: exec pending interrupt %d\n", i);
 			goto trap;
 		}
 		goto finish;
@@ -182,13 +182,13 @@ int sim_core_exec(
 		if(! input->instr.fault) {
 			/* stall if instruction isn't ready yet */
 			state->inter.instr_stall = true;
-			TRACE(state, "core: exec instr stall\n");
+			TRACE(state, 1, "core: exec instr stall\n");
 			return 0;
 		} else {
 			/* trap if we have an instr read fault */
 			state->inter.nextpc = state->ctl.named.ifaulthdl;
 			state->inter.regval = state->pc;
-			TRACE(state, "core: exec instr read fault at %x\n", state->pc);
+			TRACE(state, 1, "core: exec instr read fault at %x\n", state->pc);
 			goto trap;
 		}
 	} else {
@@ -200,7 +200,7 @@ int sim_core_exec(
 	i = check_pending_interrupt(state, input);
 	if(i >= 0) {
 		state->inter.nextpc = state->ctl.named.exihdl[i];
-		TRACE(state, "core: exec pending interrupt %d\n", i);
+		TRACE(state, 1, "core: exec pending interrupt %d\n", i);
 		goto trap;
 	}
 
@@ -212,7 +212,7 @@ int sim_core_exec(
 	if(decode_instruction(&opcode, &subcode, &fields[0], instr_value)) {
 		state->inter.nextpc = state->ctl.named.illophdl;
 		state->inter.regval = state->pc;
-		TRACE(state, "core: exec instr decode fault at %x\n", state->pc);
+		TRACE(state, 1, "core: exec instr decode fault at %x\n", state->pc);
 		goto trap;
 	}
 
@@ -228,19 +228,19 @@ int sim_core_exec(
 			switch(subcode) {
 			case 0x0:
 				alu_op = ALU_OP_OR;
-				TRACE(state, "core: exec or\n");
+				TRACE(state, 1, "core: exec or\n");
 				break;
 			case 0x1:
 				alu_op = ALU_OP_NAND;
-				TRACE(state, "core: exec nand\n");
+				TRACE(state, 1, "core: exec nand\n");
 				break;
 			case 0x2:
 				alu_op = ALU_OP_AND;
-				TRACE(state, "core: exec and\n");
+				TRACE(state, 1, "core: exec and\n");
 				break;
 			case 0x3:
 				alu_op = ALU_OP_XOR;
-				TRACE(state, "core: exec xor\n");
+				TRACE(state, 1, "core: exec xor\n");
 				break;
 			}
 			alu_arg0 = gpreg_read(state, fields[1]);
@@ -253,19 +253,19 @@ int sim_core_exec(
 			switch(subcode) {
 			case 0x0:
 				alu_op = ALU_OP_ADD;
-				TRACE(state, "core: exec add\n");
+				TRACE(state, 1, "core: exec add\n");
 				break;
 			case 0x1:
 				alu_op = ALU_OP_SUB;
-				TRACE(state, "core: exec sub\n");
+				TRACE(state, 1, "core: exec sub\n");
 				break;
 			case 0x2:
 				alu_op = ALU_OP_ADDC;
-				TRACE(state, "core: exec addc\n");
+				TRACE(state, 1, "core: exec addc\n");
 				break;
 			case 0x3:
 				alu_op = ALU_OP_SUBC;
-				TRACE(state, "core: exec subc\n");
+				TRACE(state, 1, "core: exec subc\n");
 				break;
 			}
 			alu_arg0 = gpreg_read(state, fields[1]);
@@ -278,19 +278,19 @@ int sim_core_exec(
 			switch(subcode) {
 			case 0x0:
 				alu_op = ALU_OP_SHL;
-				TRACE(state, "core: exec shl\n");
+				TRACE(state, 1, "core: exec shl\n");
 				break;
 			case 0x1:
 				alu_op = ALU_OP_SHR;
-				TRACE(state, "core: exec shr\n");
+				TRACE(state, 1, "core: exec shr\n");
 				break;
 			case 0x2:
 				alu_op = ALU_OP_SHRA;
-				TRACE(state, "core: exec shra\n");
+				TRACE(state, 1, "core: exec shra\n");
 				break;
 			case 0x3:
 				alu_op = ALU_OP_ROT;
-				TRACE(state, "core: exec rot\n");
+				TRACE(state, 1, "core: exec rot\n");
 				break;
 			}
 			alu_arg0 = gpreg_read(state, fields[1]);
@@ -303,19 +303,19 @@ int sim_core_exec(
 			switch(subcode) {
 			case 0x0:
 				alu_op = ALU_OP_SHL;
-				TRACE(state, "core: exec shli\n");
+				TRACE(state, 1, "core: exec shli\n");
 				break;
 			case 0x1:
 				alu_op = ALU_OP_SHR;
-				TRACE(state, "core: exec shri\n");
+				TRACE(state, 1, "core: exec shri\n");
 				break;
 			case 0x2:
 				alu_op = ALU_OP_SHRA;
-				TRACE(state, "core: exec shrai\n");
+				TRACE(state, 1, "core: exec shrai\n");
 				break;
 			case 0x3:
 				alu_op = ALU_OP_ROT;
-				TRACE(state, "core: exec roti\n");
+				TRACE(state, 1, "core: exec roti\n");
 				break;
 			}
 			alu_arg0 = gpreg_read(state, fields[0]);
@@ -325,13 +325,13 @@ int sim_core_exec(
 			state->inter.type = GPRUP;
 			break;
 		case 0x04: /* li */
-			TRACE(state, "core: exec li\n");
+			TRACE(state, 1, "core: exec li\n");
 			state->inter.regnum = fields[0];
 			state->inter.regval = fields[1];
 			state->inter.type = GPRUP;
 			break;
 		case 0x05: /* shlli */
-			TRACE(state, "core: exec shlli\n");
+			TRACE(state, 1, "core: exec shlli\n");
 			alu_arg0 = gpreg_read(state, fields[0]);
 			alu_arg1 = fields[1];
 			alu_op = ALU_OP_SHL8OR;
@@ -340,7 +340,7 @@ int sim_core_exec(
 			state->inter.type = GPRUP;
 			break;
 		case 0x06: /* inci */
-			TRACE(state, "core: exec inci\n");
+			TRACE(state, 1, "core: exec inci\n");
 			alu_arg0 = gpreg_read(state, fields[0]);
 			alu_arg1 = fields[1];
 			alu_op = ALU_OP_ADD;
@@ -349,7 +349,7 @@ int sim_core_exec(
 			state->inter.type = GPRUP;
 			break;
 		case 0x07: /* deci */
-			TRACE(state, "core: exec deci\n");
+			TRACE(state, 1, "core: exec deci\n");
 			alu_arg0 = gpreg_read(state, fields[0]);
 			alu_arg1 = fields[1];
 			alu_op = ALU_OP_SUB;
@@ -358,7 +358,7 @@ int sim_core_exec(
 			state->inter.type = GPRUP;
 			break;
 		case 0x08: /* ori */
-			TRACE(state, "core: exec ori\n");
+			TRACE(state, 1, "core: exec ori\n");
 			alu_arg0 = gpreg_read(state, fields[0]);
 			alu_arg1 = fields[1];
 			alu_op = ALU_OP_OR;
@@ -367,7 +367,7 @@ int sim_core_exec(
 			state->inter.type = GPRUP;
 			break;
 		case 0x09: /* andi */
-			TRACE(state, "core: exec andi\n");
+			TRACE(state, 1, "core: exec andi\n");
 			alu_arg0 = gpreg_read(state, fields[0]);
 			alu_arg1 = fields[1] | (0xFF << 8);
 			alu_op = ALU_OP_AND;
@@ -376,7 +376,7 @@ int sim_core_exec(
 			state->inter.type = GPRUP;
 			break;
 		case 0x0A: /* xori */
-			TRACE(state, "core: exec xori\n");
+			TRACE(state, 1, "core: exec xori\n");
 			alu_arg0 = gpreg_read(state, fields[0]);
 			alu_arg1 = fields[1];
 			alu_op = ALU_OP_XOR;
@@ -385,7 +385,7 @@ int sim_core_exec(
 			state->inter.type = GPRUP;
 			break;
 		case 0x0B: /* orih */
-			TRACE(state, "core: exec orih\n");
+			TRACE(state, 1, "core: exec orih\n");
 			alu_arg0 = gpreg_read(state, fields[0]);
 			alu_arg1 = fields[1] << 8;
 			alu_op = ALU_OP_OR;
@@ -394,7 +394,7 @@ int sim_core_exec(
 			state->inter.type = GPRUP;
 			break;
 		case 0x0C: /* andih */
-			TRACE(state, "core: exec andih\n");
+			TRACE(state, 1, "core: exec andih\n");
 			alu_arg0 = gpreg_read(state, fields[0]);
 			alu_arg1 = (fields[1] << 8) | 0xFF;
 			alu_op = ALU_OP_AND;
@@ -403,7 +403,7 @@ int sim_core_exec(
 			state->inter.type = GPRUP;
 			break;
 		case 0x0D: /* xorih */
-			TRACE(state, "core: exec xorih\n");
+			TRACE(state, 1, "core: exec xorih\n");
 			alu_arg0 = gpreg_read(state, fields[0]);
 			alu_arg1 = fields[1] << 8;
 			alu_op = ALU_OP_XOR;
@@ -412,23 +412,23 @@ int sim_core_exec(
 			state->inter.type = GPRUP;
 			break;
 		case 0x0E: /* sleep */
-			TRACE(state, "core: exec sleep\n");
+			TRACE(state, 1, "core: exec sleep\n");
 			if(STATUS_GET_UM(state->ctl.named.status)) {
-				TRACE(state, "core: exec insufficient priviledge\n");
+				TRACE(state, 1, "core: exec insufficient priviledge\n");
 				state->inter.nextpc = state->ctl.named.privophdl;
 				goto trap;
 			}
 			state->inter.type = SLEEP;
 			break;
 		case 0x0F: /* ba */
-			TRACE(state, "core: exec ba\n");
+			TRACE(state, 1, "core: exec ba\n");
 			alu_arg0 = state->pc;
 			alu_arg1 = fields[0];
 			state->inter.type = BRANCH;
 			state->inter.nextpc = alu_exec(ALU_OP_ADD, alu_arg0, alu_arg1);
 			break;
 		case 0x10: /* bal */
-			TRACE(state, "core: exec bal\n");
+			TRACE(state, 1, "core: exec bal\n");
 			alu_arg0 = state->pc;
 			alu_arg1 = fields[0];
 			state->inter.regnum = 7;
@@ -437,9 +437,9 @@ int sim_core_exec(
 			state->inter.type = GPRUP;
 			break;
 		case 0x11: /* bz */
-			TRACE(state, "core: exec bz\n");
+			TRACE(state, 1, "core: exec bz\n");
 			if(gpreg_read(state, fields[0]) == 0) {
-				TRACE(state, "core: exec branch taken\n");
+				TRACE(state, 1, "core: exec branch taken\n");
 				alu_arg0 = fields[1];
 				alu_arg1 = state->pc;
 				state->inter.nextpc = alu_exec(ALU_OP_ADD, alu_arg0, alu_arg1);
@@ -447,9 +447,9 @@ int sim_core_exec(
 			state->inter.type = BRANCH;
 			break;
 		case 0x12: /* bnz */
-			TRACE(state, "core: exec bnz\n");
+			TRACE(state, 1, "core: exec bnz\n");
 			if(gpreg_read(state, fields[0]) != 0) {
-				TRACE(state, "core: exec branch taken\n");
+				TRACE(state, 1, "core: exec branch taken\n");
 				alu_arg0 = fields[1];
 				alu_arg1 = state->pc;
 				state->inter.nextpc = alu_exec(ALU_OP_ADD, alu_arg0, alu_arg1);
@@ -457,14 +457,14 @@ int sim_core_exec(
 			state->inter.type = BRANCH;
 			break;
 		case 0x13: /* jr */
-			TRACE(state, "core: exec jr\n");
+			TRACE(state, 1, "core: exec jr\n");
 			alu_arg0 = gpreg_read(state, fields[0]);
 			alu_arg1 = fields[1];
 			state->inter.nextpc = alu_exec(ALU_OP_ADD, alu_arg0, alu_arg1);
 			state->inter.type = BRANCH;
 			break;
 		case 0x14: /* jlr */
-			TRACE(state, "core: exec jlr\n");
+			TRACE(state, 1, "core: exec jlr\n");
 			alu_arg0 = gpreg_read(state, fields[0]);
 			alu_arg1 = fields[1];
 			state->inter.regval = state->pc + 1;
@@ -473,7 +473,7 @@ int sim_core_exec(
 			state->inter.type = BRLINK;
 			break;
 		case 0x15: /* ll */
-			TRACE(state, "core: exec ll\n");
+			TRACE(state, 1, "core: exec ll\n");
 			alu_arg0 = gpreg_read(state, fields[1]);
 			alu_arg1 = fields[2];
 			output->data.addr = alu_exec(ALU_OP_ADD, alu_arg0, alu_arg1);
@@ -484,7 +484,7 @@ int sim_core_exec(
 			state->inter.type = LOADLNK;
 			break;
 		case 0x16: /* ldw */
-			TRACE(state, "core: exec ldw\n");
+			TRACE(state, 1, "core: exec ldw\n");
 			alu_arg0 = gpreg_read(state, fields[1]);
 			alu_arg1 = fields[2];
 			output->data.addr = alu_exec(ALU_OP_ADD, alu_arg0, alu_arg1);
@@ -494,7 +494,7 @@ int sim_core_exec(
 			state->inter.type = LOAD;
 			break;
 		case 0x17: /* stw */
-			TRACE(state, "core: exec stw\n");
+			TRACE(state, 1, "core: exec stw\n");
 			alu_arg0 = gpreg_read(state, fields[1]);
 			alu_arg1 = fields[2];
 			output->data.addr = alu_exec(ALU_OP_ADD, alu_arg0, alu_arg1);
@@ -504,9 +504,9 @@ int sim_core_exec(
 			state->inter.type = STORE;
 			break;
 		case 0x18: /* sc */
-			TRACE(state, "core: exec sc\n");
+			TRACE(state, 1, "core: exec sc\n");
 			if(STATUS_GET_LL(state->ctl.named.status)) {
-				TRACE(state, "core: exec sc succeed\n");
+				TRACE(state, 1, "core: exec sc succeed\n");
 				alu_arg0 = gpreg_read(state, fields[1]);
 				alu_arg1 = fields[2];
 				output->data.addr = alu_exec(ALU_OP_ADD, alu_arg0, alu_arg1);
@@ -517,18 +517,18 @@ int sim_core_exec(
 				state->inter.regval = 1;
 				state->inter.type = SCOND;
 			} else {
-				TRACE(state, "core: exec sc fail\n");
+				TRACE(state, 1, "core: exec sc fail\n");
 				state->inter.regnum = fields[0];
 				state->inter.regval = 0;
 				state->inter.type = GPRUP;
 			}
 			break;
 		case 0x19: /* mfcp */
-			TRACE(state, "core: exec mfcp\n");
+			TRACE(state, 1, "core: exec mfcp\n");
 			if(STATUS_GET_UM(state->ctl.named.status)) {
 				uint8_t cpmask = 0x1 << fields[1];
 				if(! cpmask & state->ctl.named.umcpen) {
-					TRACE(state, "core: exec insufficient priviledge\n");
+					TRACE(state, 1, "core: exec insufficient priviledge\n");
 					state->inter.nextpc = state->ctl.named.privophdl;
 					goto trap;
 				}
@@ -540,11 +540,11 @@ int sim_core_exec(
 			state->inter.regnum = fields[0];
 			break;
 		case 0x1A: /* mtcp */
-			TRACE(state, "core: exec mtcp\n");
+			TRACE(state, 1, "core: exec mtcp\n");
 			if(STATUS_GET_UM(state->ctl.named.status)) {
 				uint8_t cpmask = 0x1 << fields[1];
 				if(! cpmask & state->ctl.named.umcpen) {
-					TRACE(state, "core: exec insufficient priviledge\n");
+					TRACE(state, 1, "core: exec insufficient priviledge\n");
 					state->inter.nextpc = state->ctl.named.privophdl;
 					goto trap;
 				}
@@ -556,11 +556,11 @@ int sim_core_exec(
 			state->inter.type = BRANCH;
 			break;
 		case 0x1B: /* cpop */
-			TRACE(state, "core: exec cpop\n");
+			TRACE(state, 1, "core: exec cpop\n");
 			if(STATUS_GET_UM(state->ctl.named.status)) {
 				uint8_t cpmask = 0x1 << fields[1];
 				if(! cpmask & state->ctl.named.umcpen) {
-					TRACE(state, "core: exec insufficient priviledge\n");
+					TRACE(state, 1, "core: exec insufficient priviledge\n");
 					state->inter.nextpc = state->ctl.named.privophdl;
 					goto trap;
 				}
@@ -571,7 +571,7 @@ int sim_core_exec(
 			state->inter.type = BRANCH;
 			break;
 		case 0x1C: /* int */
-			TRACE(state, "core: exec int\n");
+			TRACE(state, 1, "core: exec int\n");
 			state->inter.regval = state->pc + 1;
 			STATUS_SET_SWIARG(state->inter.newstat, fields[0]);
 			status_trap(&(state->inter.newstat)); /* c.f. "goto trap;" */
@@ -579,9 +579,9 @@ int sim_core_exec(
 			state->inter.type = TRAP;
 			break;
 		case 0x1D: /* rfi */
-			TRACE(state, "core: exec rfi\n");
+			TRACE(state, 1, "core: exec rfi\n");
 			if(STATUS_GET_UM(state->ctl.named.status)) {
-				TRACE(state, "core: exec insufficient priviledge\n");
+				TRACE(state, 1, "core: exec insufficient priviledge\n");
 				state->inter.nextpc = state->ctl.named.privophdl;
 				goto trap;
 			}
@@ -590,9 +590,9 @@ int sim_core_exec(
 			state->inter.type = RFI;
 			break;
 		case 0x1E: /* mfctl */
-			TRACE(state, "core: exec mfctl\n");
+			TRACE(state, 1, "core: exec mfctl\n");
 			if(STATUS_GET_UM(state->ctl.named.status)) {
-				TRACE(state, "core: exec insufficient priviledge\n");
+				TRACE(state, 1, "core: exec insufficient priviledge\n");
 				state->inter.nextpc = state->ctl.named.privophdl;
 				goto trap;
 			}
@@ -601,9 +601,9 @@ int sim_core_exec(
 			state->inter.type = GPRUP;
 			break;
 		case 0x1F: /* mtctl */
-			TRACE(state, "core: exec mtctl\n");
+			TRACE(state, 1, "core: exec mtctl\n");
 			if(STATUS_GET_UM(state->ctl.named.status)) {
-				TRACE(state, "core: exec insufficient priviledge\n");
+				TRACE(state, 1, "core: exec insufficient priviledge\n");
 				state->inter.nextpc = state->ctl.named.privophdl;
 				goto trap;
 			}
@@ -612,7 +612,7 @@ int sim_core_exec(
 			state->inter.type = CTLUP;
 			break;
 		default: /* ??? */
-			TRACE(state, "core: ERROR: exec fallthrough\n");
+			TRACE(state, 1, "core: ERROR: exec fallthrough\n");
 			return -1;
 	}
 	goto finish;
@@ -624,7 +624,7 @@ trap:
 
 finish:
 #if 0
-	TRACEBLOCK(state, {
+	TRACEBLOCK(state, 1, {
 		char *type;
 		printf("core: exec done\n");
 		printf("core: inter regnum=%d regval=%x\n",
@@ -667,7 +667,7 @@ static void update_propagate_signals(
 
 	/* propagate input pins to appropriate ctl register bits */
 	for(i = 0; i < SIM_CORE_NUM_EXTINT; i++) {
-		TRACEBLOCK(state, {
+		TRACEBLOCK(state, 1, {
 			if((TEST_BIT(state->ctl.named.ipend, i) != 0) !=
 			   input->exint_sig[i]) {
 				if(input->exint_sig[i]) {
@@ -694,13 +694,13 @@ int sim_core_update(
 
 	/* don't do anything if we've stalled at the exec stage */
 	if(state->inter.instr_stall) {
-		TRACE(state, "core: update instr stall\n");
+		TRACE(state, 1, "core: update instr stall\n");
 		goto counter;
 	}
 
 	/* sleeping and we aren't in a trap? noop. */
 	if(state->sleeping && state->inter.type != TRAP) {
-		TRACE(state, "core: update sleeping\n");
+		TRACE(state, 1, "core: update sleeping\n");
 		return 0;
 	}
 
@@ -708,30 +708,30 @@ int sim_core_update(
 
 	switch(state->inter.type) {
 	case GPRUP:
-		TRACE(state, "core: update GPRUP\n");
+		TRACE(state, 1, "core: update GPRUP\n");
 		gpreg_write(state, state->inter.regnum, state->inter.regval);
 		break;
 	case BRANCH:
 		/* just jump to nextpc (done by default) */
-		TRACE(state, "core: update BRANCH\n");
+		TRACE(state, 1, "core: update BRANCH\n");
 		break;
 	case BRLINK:
 		/* go to nextpc, but also save pc into R7 */
-		TRACE(state, "core: update BRLINK\n");
+		TRACE(state, 1, "core: update BRLINK\n");
 		gpreg_write(state, 7, state->inter.regval);
 		break;
 	case LOAD:
 		if(! input->data.valid && ! input->data.fault) {
-			TRACE(state, "core: update LOAD data stall\n");
+			TRACE(state, 1, "core: update LOAD data stall\n");
 			state->inter.data_stall = true;
 			output->instr.request = false;
 			goto counter;
 		} else if(input->data.fault) {
-			TRACE(state, "core: update LOAD data fault\n");
+			TRACE(state, 1, "core: update LOAD data fault\n");
 			status_trap(&(state->inter.newstat));
 			state->inter.nextpc = state->ctl.named.dfaulthdl;
 		} else {
-			TRACE(state, "core: update LOAD\n");
+			TRACE(state, 1, "core: update LOAD\n");
 			STATUS_SET_LL(state->ctl.named.status, false);
 			gpreg_write(state, state->inter.regnum, input->data.value);
 			output->data.request = false;
@@ -740,16 +740,16 @@ int sim_core_update(
 		break;
 	case LOADLNK:
 		if(! input->data.valid && ! input->data.fault) {
-			TRACE(state, "core: update LOADLNK data stall\n");
+			TRACE(state, 1, "core: update LOADLNK data stall\n");
 			state->inter.data_stall = true;
 			output->instr.request = false;
 			goto counter;
 		} else if(input->data.fault) {
-			TRACE(state, "core: update LOADLNK data fault\n");
+			TRACE(state, 1, "core: update LOADLNK data fault\n");
 			status_trap(&(state->inter.newstat));
 			state->inter.nextpc = state->ctl.named.dfaulthdl;
 		} else {
-			TRACE(state, "core: update LOADLNK\n");
+			TRACE(state, 1, "core: update LOADLNK\n");
 			STATUS_SET_LL(state->ctl.named.status, true);
 			gpreg_write(state, state->inter.regnum, input->data.value);
 			output->data.request = false;
@@ -758,16 +758,16 @@ int sim_core_update(
 		break;
 	case STORE:
 		if(! input->data.valid && ! input->data.fault) {
-			TRACE(state, "core: update STORE data stall\n");
+			TRACE(state, 1, "core: update STORE data stall\n");
 			state->inter.data_stall = true;
 			output->instr.request = false;
 			goto counter;
 		} else if(input->data.fault) {
-			TRACE(state, "core: update STORE data fault\n");
+			TRACE(state, 1, "core: update STORE data fault\n");
 			status_trap(&(state->inter.newstat));
 			state->inter.nextpc = state->ctl.named.dfaulthdl;
 		} else {
-			TRACE(state, "core: update STORE\n");
+			TRACE(state, 1, "core: update STORE\n");
 			STATUS_SET_LL(state->ctl.named.status, false);
 			output->data.request = false;
 		}
@@ -775,17 +775,17 @@ int sim_core_update(
 		break;
 	case SCOND:
 		if(! input->data.valid && ! input->data.fault) {
-			TRACE(state, "core: update SCOND data stall\n");
+			TRACE(state, 1, "core: update SCOND data stall\n");
 			state->inter.data_stall = true;
 			output->instr.request = false;
 			goto counter;
 		}
 		else if(input->data.fault) {
-			TRACE(state, "core: update SCOND data fault\n");
+			TRACE(state, 1, "core: update SCOND data fault\n");
 			status_trap(&(state->inter.newstat));
 			state->inter.nextpc = state->ctl.named.dfaulthdl;
 		} else {
-			TRACE(state, "core: update SCOND\n");
+			TRACE(state, 1, "core: update SCOND\n");
 			STATUS_SET_LL(state->ctl.named.status, false);
 			output->data.request = false;
 			gpreg_write(state, state->inter.regnum, 1);
@@ -793,26 +793,26 @@ int sim_core_update(
 		state->inter.data_stall = false;
 		break;
 	case CTLUP:
-		TRACE(state, "core: update CTLUP reg %d val %x\n",
+		TRACE(state, 1, "core: update CTLUP reg %d val %x\n",
 		      state->inter.regnum, state->inter.regval);
 		state->ctl.array[state->inter.regnum] = state->inter.regval;
 		break;
 	case CPREAD:
-		TRACE(state, "core: update CPREAD\n");
+		TRACE(state, 1, "core: update CPREAD\n");
 		gpreg_write(state, state->inter.regnum, input->coproc.value);
 		break;
 	case TRAP:
-		TRACE(state, "core: update TRAP\n");
+		TRACE(state, 1, "core: update TRAP\n");
 		state->ctl.named.epc_saved = state->ctl.named.epc;
 		state->ctl.named.epc = state->inter.regval;
 		state->sleeping = false;
 		break;
 	case RFI:
-		TRACE(state, "core: update RFI\n");
+		TRACE(state, 1, "core: update RFI\n");
 		state->ctl.named.epc = state->ctl.named.epc_saved;
 		break;
 	case SLEEP:
-		TRACE(state, "core: update SLEEP\n");
+		TRACE(state, 1, "core: update SLEEP\n");
 		state->sleeping = true;
 		// when the trap comes to disloge this, we need to continue at the
 		// next instruction
@@ -835,4 +835,14 @@ counter:
 	}
 
 	return 0;
+}
+
+int sim_core_cp_op_pending(
+	coproc_op_t op,
+	sim_core_output_t *output)
+{
+	if(output->coproc.op == op) {
+		return output->coproc.select;
+	}
+	return -1;
 }

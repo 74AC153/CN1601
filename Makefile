@@ -3,7 +3,7 @@ CC=gcc
 CFLAGS=-g -Wall -Wextra
 LDFLAGS=
 
-default: instructions_test asm dasm sim tags cscope.out
+default: instructions_test asm dasm sim index utils_test
 
 clean:
 	rm *.o instructions_test asm dasm sim tags cscope.out
@@ -55,6 +55,9 @@ sim_core.o: sim_core.c sim_core.h
 sim_memif.o: sim_memif.c sim_memif.h
 	${CC} ${CFLAGS} -c sim_memif.c
 
+sim_cp_if.o: sim_cp_if.c sim_cp_if.h
+	${CC} ${CFLAGS} -c sim_cp_if.c
+
 sim_cp_timer.o: sim_cp_timer.c sim_cp_timer.h
 	${CC} ${CFLAGS} -c sim_cp_timer.c
 
@@ -70,7 +73,7 @@ sim_utils.o: sim_utils.c sim_utils.h
 sim_test: sim_test.o sim_core.o sim_utils.o
 	${CC} ${LDFLAGS} -o sim_test sim_test.o sim_core.o sim_utils.o
 
-sim: sim.o sim_core.o sim_utils.o instructions.o instr_table.o utils.o sim_memif.o sim_cp_timer.o sim_cp_nvram.o
+sim: sim.o sim_core.o sim_utils.o instructions.o instr_table.o utils.o sim_cp_if.o sim_memif.o sim_cp_timer.o sim_cp_nvram.o
 	${CC} ${LDFLAGS} -o sim \
 	sim.o \
 	sim_core.o \
@@ -78,6 +81,7 @@ sim: sim.o sim_core.o sim_utils.o instructions.o instr_table.o utils.o sim_memif
 	instructions.o \
 	instr_table.o \
 	utils.o \
+	sim_cp_if.o \
 	sim_memif.o \
 	sim_cp_timer.o \
 	sim_cp_nvram.o

@@ -38,7 +38,7 @@ ll invalidate=false
 delay=0 quiescent=true 
 *** DATA MEM ***
 delay=0 quiescent=true 
-> *** TIMER ***
+> *** COPROCESSOR: timer ***
 enabled: 1
 cycles_lo: 6
 cycles_hi: 0
@@ -77,7 +77,7 @@ ll invalidate=false
 delay=0 quiescent=true 
 *** DATA MEM ***
 delay=0 quiescent=true 
-> *** TIMER ***
+> *** COPROCESSOR: timer ***
 enabled: 0
 cycles_lo: 0
 cycles_hi: 0
@@ -116,7 +116,7 @@ ll invalidate=false
 delay=0 quiescent=true 
 *** DATA MEM ***
 delay=0 quiescent=true 
-> *** TIMER ***
+> *** COPROCESSOR: timer ***
 enabled: 0
 cycles_lo: 0
 cycles_hi: 0
