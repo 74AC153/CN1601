@@ -2,6 +2,8 @@ ARRLEN	sim.c	/^#define ARRLEN(ARR) (sizeof(ARR) \/ sizeof(ARR[0])/
 BITMASK	instructions.c	/^#define BITMASK(WIDTH, START) \\$/
 CP_NVRAM_DELAY_CYCLES	sim_cp_nvram.h	/^#define CP_NVRAM_DELAY_CYCLES 3$/
 CP_NVRAM_INSTR_ACK	sim_cp_nvram.h	/^#define CP_NVRAM_INSTR_ACK 3$/
+CP_NVRAM_INSTR_GETLEN_HI	sim_cp_nvram.h	/^#define CP_NVRAM_INSTR_GETLEN_HI 5$/
+CP_NVRAM_INSTR_GETLEN_LO	sim_cp_nvram.h	/^#define CP_NVRAM_INSTR_GETLEN_LO 4$/
 CP_NVRAM_INSTR_NOOP	sim_cp_nvram.h	/^#define CP_NVRAM_INSTR_NOOP 0$/
 CP_NVRAM_INSTR_READ	sim_cp_nvram.h	/^#define CP_NVRAM_INSTR_READ 1$/
 CP_NVRAM_INSTR_WRITE	sim_cp_nvram.h	/^#define CP_NVRAM_INSTR_WRITE 2$/
@@ -35,7 +37,6 @@ Mdasm	dasm.c	/^int main(int argc, char *argv[])$/
 Minstructions_test	instructions_test.c	/^int main(int argc, char *argv[])$/
 Msim	sim.c	/^int main(int argc, char *argv[])$/
 Msim_core_test	sim_core_test.c	/^int main(int argc, char *argv[])$/
-Mutils_test	utils_test.c	/^int main(int argc, char *argv[])$/
 NVRAM_ADDR_HI	sim_cp_nvram.c	/^#define NVRAM_ADDR_HI(STATE) ((STATE)->hdr.regs[CP/
 NVRAM_ADDR_LO	sim_cp_nvram.c	/^#define NVRAM_ADDR_LO(STATE) ((STATE)->hdr.regs[CP/
 NVRAM_CTL	sim_cp_nvram.c	/^#define NVRAM_CTL(STATE) ((STATE)->hdr.regs[CP_NVR/
@@ -167,10 +168,6 @@ sim_cp_info_t	sim_cp_if.h	/^} sim_cp_info_t;$/
 sim_cp_nvram_state_t	sim_cp_nvram.h	/^} sim_cp_nvram_state_t;$/
 sim_cp_read	sim_cp_if.c	/^void sim_cp_read($/
 sim_cp_state_hdr_t	sim_cp_if.h	/^} sim_cp_state_hdr_t;$/
-sim_cp_timer_access	sim_cp_timer.c	/^void sim_cp_timer_access($/
-sim_cp_timer_deinit	sim_cp_timer.c	/^void sim_cp_timer_deinit($/
-sim_cp_timer_init	sim_cp_timer.c	/^void sim_cp_timer_init($/
-sim_cp_timer_reset	sim_cp_timer.c	/^void sim_cp_timer_reset($/
 sim_cp_timer_state_t	sim_cp_timer.h	/^} sim_cp_timer_state_t;$/
 sim_cp_write	sim_cp_if.c	/^void sim_cp_write($/
 sim_memif_access	sim_memif.c	/^void sim_memif_access($/

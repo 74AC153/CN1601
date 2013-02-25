@@ -1,0 +1,121 @@
+nvram: loaded ../../nvram.dat (131072 words)
+resetting core state to power-on values
+clearing memory
+reading test_39.asm.bin
+31 words loaded at offset 0x0
+setting pc to 0x0000
+> running 40 cycles
+> *** STATE ***
+pc=0014
+s7=0000 s6=0000 s5=0000 s4=0002 s3=cafe s2=0001 s1=aaaa s0=0003 
+r7=0000 r6=0000 r5=0000 r4=0000 r3=0000 r2=0000 r1=0000 r0=0000 
+epc=0000 epc_s=0000
+swiarg=0000 ru_s=0 ll=0 ru=0 gie=1 um=0
+ifhdl=0000 dfhdl=0000 swihdl=0000 illhdl=0000 prvhdl=0000
+exinthdl[7..0]: 0000 0000 0000 0000 0000 0000 001c 0000 
+ ienable[7..0]: 0 0 0 0 0 0 1 0 
+ipending[7..0]: 0 0 0 0 0 0 0 0 
+    iack[7..0]: 0 0 0 0 0 0 0 0 
+  umcpen[7..0]: 0 0 0 0 0 0 0 0 
+counter hi=0000 lo=0028
+inter regnum=4 regval=0002
+inter swiarg=0000 ru_s=0 ll=0 ru=0 gie=1 um=0
+inter nextpc=0014
+inter instr_stall: false data_stall: false
+inter type: BRANCH
+> running 8 cycles
+> *** STATE ***
+pc=001e
+s7=0000 s6=0000 s5=0000 s4=0002 s3=cafe s2=0001 s1=aaaa s0=0003 
+r7=0000 r6=0000 r5=0000 r4=0000 r3=0000 r2=0000 r1=0000 r0=0000 
+epc=0015 epc_s=0000
+swiarg=0000 ru_s=0 ll=0 ru=0 gie=0 um=0
+ifhdl=0000 dfhdl=0000 swihdl=0000 illhdl=0000 prvhdl=0000
+exinthdl[7..0]: 0000 0000 0000 0000 0000 0000 001c 0000 
+ ienable[7..0]: 0 0 0 0 0 0 1 0 
+ipending[7..0]: 0 0 0 0 0 0 0 0 
+    iack[7..0]: 0 0 0 0 0 0 0 0 
+  umcpen[7..0]: 0 0 0 0 0 0 0 0 
+counter hi=0000 lo=0030
+inter regnum=0 regval=0003
+inter swiarg=0000 ru_s=0 ll=0 ru=0 gie=0 um=0
+inter nextpc=001e
+inter instr_stall: true  data_stall: false
+inter type: BRANCH
+> running 1 cycles
+> *** STATE ***
+pc=0015
+s7=0000 s6=0000 s5=0000 s4=0002 s3=cafe s2=0001 s1=aaaa s0=0003 
+r7=0000 r6=0000 r5=0000 r4=0000 r3=0000 r2=0000 r1=0000 r0=0000 
+epc=0000 epc_s=0000
+swiarg=0000 ru_s=0 ll=0 ru=0 gie=1 um=0
+ifhdl=0000 dfhdl=0000 swihdl=0000 illhdl=0000 prvhdl=0000
+exinthdl[7..0]: 0000 0000 0000 0000 0000 0000 001c 0000 
+ ienable[7..0]: 0 0 0 0 0 0 1 0 
+ipending[7..0]: 0 0 0 0 0 0 0 0 
+    iack[7..0]: 0 0 0 0 0 0 0 0 
+  umcpen[7..0]: 0 0 0 0 0 0 0 0 
+counter hi=0000 lo=0031
+inter regnum=0 regval=0003
+inter swiarg=0000 ru_s=0 ll=0 ru=0 gie=1 um=0
+inter nextpc=0015
+inter instr_stall: false data_stall: false
+inter type: RFI
+> running 19 cycles
+> *** STATE ***
+pc=001b
+s7=0000 s6=0000 s5=0001 s4=0002 s3=aaaa s2=0001 s1=aaaa s0=0003 
+r7=0000 r6=0000 r5=0000 r4=0000 r3=0000 r2=0000 r1=0000 r0=0000 
+epc=0000 epc_s=0000
+swiarg=0000 ru_s=0 ll=0 ru=0 gie=1 um=0
+ifhdl=0000 dfhdl=0000 swihdl=0000 illhdl=0000 prvhdl=0000
+exinthdl[7..0]: 0000 0000 0000 0000 0000 0000 001c 0000 
+ ienable[7..0]: 0 0 0 0 0 0 1 0 
+ipending[7..0]: 0 0 0 0 0 0 0 0 
+    iack[7..0]: 0 0 0 0 0 0 0 0 
+  umcpen[7..0]: 0 0 0 0 0 0 0 0 
+counter hi=0000 lo=0044
+inter regnum=0 regval=0003
+inter swiarg=0000 ru_s=0 ll=0 ru=0 gie=1 um=0
+inter nextpc=001b
+inter instr_stall: false data_stall: false
+inter type: RFI
+> running 1 cycles
+> *** STATE ***
+pc=001b
+s7=0000 s6=0000 s5=0001 s4=0002 s3=aaaa s2=0001 s1=aaaa s0=0003 
+r7=0000 r6=0000 r5=0000 r4=0000 r3=0000 r2=0000 r1=0000 r0=0000 
+epc=0000 epc_s=0000
+swiarg=0000 ru_s=0 ll=0 ru=0 gie=1 um=0
+ifhdl=0000 dfhdl=0000 swihdl=0000 illhdl=0000 prvhdl=0000
+exinthdl[7..0]: 0000 0000 0000 0000 0000 0000 001c 0000 
+ ienable[7..0]: 0 0 0 0 0 0 1 0 
+ipending[7..0]: 0 0 0 0 0 0 0 0 
+    iack[7..0]: 0 0 0 0 0 0 0 0 
+  umcpen[7..0]: 0 0 0 0 0 0 0 0 
+counter hi=0000 lo=0045
+inter regnum=0 regval=0003
+inter swiarg=0000 ru_s=0 ll=0 ru=0 gie=1 um=0
+inter nextpc=001b
+inter instr_stall: true  data_stall: false
+inter type: RFI
+> running 2 cycles
+> *** STATE ***
+pc=001c
+s7=0000 s6=cafe s5=0001 s4=0002 s3=aaaa s2=0001 s1=aaaa s0=0003 
+r7=0000 r6=0000 r5=0000 r4=0000 r3=0000 r2=0000 r1=0000 r0=0000 
+epc=0000 epc_s=0000
+swiarg=0000 ru_s=0 ll=0 ru=0 gie=1 um=0
+ifhdl=0000 dfhdl=0000 swihdl=0000 illhdl=0000 prvhdl=0000
+exinthdl[7..0]: 0000 0000 0000 0000 0000 0000 001c 0000 
+ ienable[7..0]: 0 0 0 0 0 0 1 0 
+ipending[7..0]: 0 0 0 0 0 0 0 0 
+    iack[7..0]: 0 0 0 0 0 0 0 0 
+  umcpen[7..0]: 0 0 0 0 0 0 0 0 
+counter hi=0000 lo=0047
+inter regnum=6 regval=0003
+inter swiarg=0000 ru_s=0 ll=0 ru=0 gie=1 um=0
+inter nextpc=001c
+inter instr_stall: true  data_stall: false
+inter type: CPREAD
+> 

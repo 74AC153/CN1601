@@ -31,6 +31,7 @@ sim_memif_state_t imem_state;
 uint16_t physmem[PHYSMEM_NUMWORDS];
 
 sim_cp_timer_state_t timer_state;
+sim_cp_nvram_state_t nvram_state;
 
 bool g_continue = true;
 
@@ -54,6 +55,18 @@ sim_cp_info_t coproc_info[] = {
 		timer_state_exec,
 		NULL, /*fetch*/
 		timer_state_print
+	},
+	{
+		"nvram",
+		"-i <datafile>",
+		(sim_cp_state_hdr_t *) &nvram_state, 
+		nvram_state_init,
+		nvram_state_deinit,
+		nvram_state_reset,
+		nvram_state_data,
+		nvram_state_exec,
+		NULL, /*fetch*/
+		nvram_state_print
 	},
 };
 /* FIXME: change this to NUM_COPROCS */
@@ -744,6 +757,13 @@ int main(int argc, char *argv[])
 interp:
 		memcpy(lastline, linebuf, sizeof(lastline));
 		status = interpret(linebuf);
+	}
+
+	/* de-init */
+	for(i = 0; i < ARRLEN(coproc_info); i++) {
+		if(coproc_info[i].deinit) {
+			coproc_info[i].deinit(coproc_info[i].state);
+		}
 	}
 
 	return 0;

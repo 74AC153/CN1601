@@ -1,0 +1,13 @@
+cycle 40
+show state
+cycle 8
+show state
+cycle
+show state
+cycle 19
+show state
+cycle
+show state
+cycle 2
+show state
+quit

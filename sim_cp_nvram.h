@@ -26,23 +26,12 @@
 #define CP_NVRAM_INSTR_READ 1
 #define CP_NVRAM_INSTR_WRITE 2
 #define CP_NVRAM_INSTR_ACK 3
+#define CP_NVRAM_INSTR_GETLEN_LO 4
+#define CP_NVRAM_INSTR_GETLEN_HI 5
 
 
 #define CP_NVRAM_DELAY_CYCLES 3
 
-#if 0
-	{
-		"nvram",
-		(sim_cp_state_hdr_t *) &nvram_state, 
-		nvram_state_init,
-		nvram_state_deinit,
-		nvram_state_reset,
-		nvram_state_data,
-		nvram_state_exec,
-		NULL, /*fetch*/
-		nvram_state_print
-	},
-#endif
 
 typedef struct {
 	sim_cp_state_hdr_t hdr;
@@ -64,22 +53,4 @@ int nvram_state_data(sim_cp_state_hdr_t *hdr);
 int nvram_state_exec(sim_cp_state_hdr_t *hdr);
 int nvram_state_print(sim_cp_state_hdr_t *hdr);
 
-#if 0
-int sim_cp_nvram_init(
-	sim_cp_nvram_state_t *state,
-	char *data_path,
-	unsigned int cpnum);
-
-void sim_cp_nvram_deinit(
-	sim_cp_nvram_state_t *nvram_state);
-
-int sim_cp_nvram_reset(
-	sim_cp_nvram_state_t *state);
-
-void sim_cp_nvram_access(
-	sim_core_input_t *core_input,
-	sim_core_output_t *core_output,
-	sim_cp_nvram_state_t *nvram_state);
-#endif
-	
 #endif

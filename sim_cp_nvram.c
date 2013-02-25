@@ -19,17 +19,32 @@
 int nvram_state_init(sim_cp_state_hdr_t *hdr)
 {
 	int ch;
-	char *data_path;
+	bool has_data = false;
+	char *data_path = NULL;
 	struct stat sb;
 	sim_cp_nvram_state_t *state = (sim_cp_nvram_state_t *) hdr;
 
+	state->datalen = 0;
+	state->data = NULL;
+	state->datafd = -1;
+
+	if(! hdr->argc) {
+		return 0;
+	}
+
+	optind = 0;
 	while((ch = getopt(hdr->argc, hdr->argv, "i:")) != -1) {
 		switch(ch) {
-		case 'i': data_path = optarg; break;
+		case 'i':
+			has_data = true;
+			data_path = optarg; break;
 		default:
 			printf("nvram: unknown switch %c\nusage: -i <imagefile>", ch);
 			return -1;
 		}
+	}
+	if(! has_data) {
+		return 0;
 	}
 	if(data_path == NULL) {
 		printf("nvram: -i <imagefile> required");
@@ -53,7 +68,7 @@ int nvram_state_init(sim_cp_state_hdr_t *hdr)
 		return -1;
 	}
 	state->data = mmap(NULL, state->datalen,
-	                         PROT_READ | PROT_WRITE, 0,
+	                         PROT_READ | PROT_WRITE, MAP_PRIVATE,
 	                         state->datafd, 0);
 	if(state->data == MAP_FAILED) {
 		fprintf(stderr, "nvram: error mmap %s: %s (errno=%d)\n",
@@ -71,6 +86,9 @@ int nvram_state_deinit(sim_cp_state_hdr_t *hdr)
 {
 	int status;
 	sim_cp_nvram_state_t *state = (sim_cp_nvram_state_t *) hdr;
+	if(! state->data) {
+		return 0;
+	}
 	status = munmap(state->data, state->datalen);
 	if(status) {
 		fprintf(stderr, "nvram: error munmap: %s (errno=%d)\n",
@@ -95,23 +113,14 @@ int nvram_state_data(sim_cp_state_hdr_t *hdr)
 {
 	sim_cp_nvram_state_t *state = (sim_cp_nvram_state_t *) hdr;
 
-	if(state->delay) {
+	if(! state->delay) {
+		return 0;
+	} else {
 		TRACE(hdr, 1, "nvram: delay %d -> %d\n",
 		      state->delay, state->delay-1);
-		state->delay--;
-	}
-
-	return 0;
-}
-
-int nvram_state_exec(sim_cp_state_hdr_t *hdr)
-{
-	sim_cp_nvram_state_t *state = (sim_cp_nvram_state_t *) hdr;
-	uint32_t addr;
-
-	/* ignore all requests if an operation is pending */
-	if(state->delay != 0) {
-		return 0;
+		if(-- state->delay) {
+			return 0;
+		}
 	}
 
 	/* if our delay has been decremented to 0 and an instruction is pending,
@@ -129,6 +138,7 @@ int nvram_state_exec(sim_cp_state_hdr_t *hdr)
 		state->inst_pend = CP_NVRAM_INSTR_NOOP;
 
 		if(NVRAM_CTL(state) & CP_NVRAM_REG_CTL_READ_INT) {
+			TRACE(hdr, 1, "nvram: read complete; raising interrupt\n");
 			hdr->core_input->exint_sig[hdr->cpnum] = true;
 		}
 		break;
@@ -145,12 +155,30 @@ int nvram_state_exec(sim_cp_state_hdr_t *hdr)
 		state->inst_pend = CP_NVRAM_INSTR_NOOP;
 
 		if(NVRAM_CTL(state) & CP_NVRAM_REG_CTL_WRITE_INT) {
+			TRACE(hdr, 1, "nvram: write complete; raising interrupt\n");
 			hdr->core_input->exint_sig[hdr->cpnum] = true;
 		}
 		break;
 
 	default:
+		TRACE(hdr, 1, "nvram: unexpected pending instr: %d\n",
+		      state->inst_pend);
+		state->delay = 0;
+		state->inst_pend = CP_NVRAM_INSTR_NOOP;
 		break;
+	}
+
+	return 0;
+}
+
+int nvram_state_exec(sim_cp_state_hdr_t *hdr)
+{
+	sim_cp_nvram_state_t *state = (sim_cp_nvram_state_t *) hdr;
+	uint32_t addr;
+
+	/* ignore all requests if an operation is pending */
+	if(state->delay) {
+		return 0;
 	}
 
 	addr = NVRAM_ADDR_LO(state) + (NVRAM_ADDR_HI(state) << 16);
@@ -162,9 +190,14 @@ int nvram_state_exec(sim_cp_state_hdr_t *hdr)
 			break;
 		}
 		TRACE(hdr, 1, "nvram: queue read\n");
-		state->inst_pend = CP_NVRAM_INSTR_READ;
-		state->addr_pend = addr;
-		state->delay = CP_NVRAM_DELAY_CYCLES;
+		if(addr < state->datalen) {
+			state->inst_pend = CP_NVRAM_INSTR_READ;
+			state->addr_pend = addr;
+			state->delay = CP_NVRAM_DELAY_CYCLES;
+		} else {
+			TRACE(hdr, 1, "nvram: queue read err\n");
+			hdr->regs[CP_NVRAM_REG_STATUS] = CP_NVRAM_REG_STATUS_READ_ERR;
+		}
 		break;
 
 	case CP_NVRAM_INSTR_WRITE:
@@ -173,15 +206,31 @@ int nvram_state_exec(sim_cp_state_hdr_t *hdr)
 			break;
 		}
 		TRACE(hdr, 1, "nvram: queue write\n");
-		state->inst_pend = CP_NVRAM_INSTR_WRITE;
-		state->addr_pend = addr;
-		state->val_pend = NVRAM_VAL(state);
-		state->delay = CP_NVRAM_DELAY_CYCLES;
+		if(addr < state->datalen) {
+			state->inst_pend = CP_NVRAM_INSTR_WRITE;
+			state->addr_pend = addr;
+			state->val_pend = NVRAM_VAL(state);
+			state->delay = CP_NVRAM_DELAY_CYCLES;
+		} else {
+			TRACE(hdr, 1, "nvram: queue write err\n");
+			hdr->regs[CP_NVRAM_REG_STATUS] = CP_NVRAM_REG_STATUS_WRITE_ERR;
+		}
 		break;
 
 	case CP_NVRAM_INSTR_ACK:
 		TRACE(hdr, 1, "nvram: ack\n");
 		NVRAM_STATUS(state) = CP_NVRAM_REG_STATUS_IDLE;
+		hdr->core_input->exint_sig[hdr->cpnum] = false;
+		break;
+
+	case CP_NVRAM_INSTR_GETLEN_LO:
+		TRACE(hdr, 1, "nvram: getlen_lo\n");
+		hdr->regs[CP_NVRAM_REG_VAL] = state->datalen & 0xFFFF;
+		break;
+
+	case CP_NVRAM_INSTR_GETLEN_HI:
+		TRACE(hdr, 1, "nvram: getlen_hi\n");
+		hdr->regs[CP_NVRAM_REG_VAL] = state->datalen >> 16;
 		break;
 
 	default:

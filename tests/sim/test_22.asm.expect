@@ -1,3 +1,4 @@
+nvram: loaded ../../nvram.dat (131072 words)
 resetting core state to power-on values
 clearing memory
 reading test_22.asm.bin

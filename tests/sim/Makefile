@@ -8,7 +8,7 @@ test:
 	${ASM} -i $< -o $@
 
 %.asm.expect: %.asm.bin %.asm.script
-	${SIM} -d -i $< < $*.asm.script > $@
+	${SIM} -d -i $< -1 -i,../../nvram.dat < $*.asm.script > $@
 
 remake: test_00.asm.expect test_01.asm.expect test_02.asm.expect \
         test_03.asm.expect test_04.asm.expect test_05.asm.expect \
@@ -16,7 +16,7 @@ remake: test_00.asm.expect test_01.asm.expect test_02.asm.expect \
         test_09.asm.expect test_10.asm.expect test_11.asm.expect \
         test_12.asm.expect test_13.asm.expect test_14.asm.expect \
         test_15.asm.expect test_16.asm.expect test_17.asm.expect \
-        test_18.asm.expect test_19.asm.expect test_20.asm.expect \
+        test_18.asm.expect                    test_20.asm.expect \
         test_21.asm.expect test_22.asm.expect test_23.asm.expect \
         test_24.asm.expect test_25.asm.expect test_26.asm.expect \
         test_27.asm.expect test_28.asm.expect test_29.asm.expect \
