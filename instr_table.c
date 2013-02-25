@@ -26,7 +26,7 @@ instr_spec_t instr_table [] = {
 	{ "shrai", 0x03, 1,  0x2, "u3_2u4", "ru4"  },
 	{ "roti",  0x03, 1,  0x3, "u3_2u4", "ru4"  },
 	{ "li",    0x04, 0,  0x0, "u3u8",   "ru8"  },
-	{ "shlli", 0x05, 0,  0x0, "u3u8",   "ru8"  },
+	{ "shlli", 0x05, 0,  0x0, "u3u8",   "ru8"  }, // redundant
 	{ "inci",  0x06, 0,  0x0, "u3u8",   "ru8"  },
 	{ "deci",  0x07, 0,  0x0, "u3u8",   "ru8"  },
 	{ "ori",   0x08, 0,  0x0, "u3u8",   "ru8"  },
