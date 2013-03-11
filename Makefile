@@ -1,9 +1,9 @@
 CC=gcc
 
-CFLAGS=-g -Wall -Wextra
-LDFLAGS=
+CFLAGS=-g -Wall -Wextra -Wno-unused
+LDFLAGS=-lpthread
 
-default: instructions_test asm dasm sim index utils_test
+default: instructions_test asm dasm sim index utils_test fifostdio
 
 clean:
 	rm *.o instructions_test asm dasm sim tags cscope.out
@@ -64,6 +64,9 @@ sim_cp_timer.o: sim_cp_timer.c sim_cp_timer.h
 sim_cp_nvram.o: sim_cp_nvram.c sim_cp_nvram.h
 	${CC} ${CFLAGS} -c sim_cp_nvram.c
 
+sim_cp_uart.o: sim_cp_uart.c sim_cp_uart.h
+	${CC} ${CFLAGS} -c sim_cp_uart.c
+
 sim.o: sim.c
 	${CC} ${CFLAGS} -c sim.c
 
@@ -73,7 +76,10 @@ sim_utils.o: sim_utils.c sim_utils.h
 sim_test: sim_test.o sim_core.o sim_utils.o
 	${CC} ${LDFLAGS} -o sim_test sim_test.o sim_core.o sim_utils.o
 
-sim: sim.o sim_core.o sim_utils.o instructions.o instr_table.o utils.o sim_cp_if.o sim_memif.o sim_cp_timer.o sim_cp_nvram.o
+sim: sim.o sim_core.o sim_utils.o instructions.o \
+     instr_table.o utils.o circbuf.o sim_cp_if.o \
+     sim_memif.o sim_cp_timer.o sim_cp_nvram.o \
+     sim_cp_uart.o mbox.o
 	${CC} ${LDFLAGS} -o sim \
 	sim.o \
 	sim_core.o \
@@ -81,10 +87,13 @@ sim: sim.o sim_core.o sim_utils.o instructions.o instr_table.o utils.o sim_cp_if
 	instructions.o \
 	instr_table.o \
 	utils.o \
+	circbuf.o \
 	sim_cp_if.o \
 	sim_memif.o \
 	sim_cp_timer.o \
-	sim_cp_nvram.o
+	sim_cp_nvram.o \
+	sim_cp_uart.o \
+	mbox.o
 
 sim_core_test.o: sim_core_test.c
 	${CC} ${CFLAGS} -c sim_core_test.c
@@ -94,3 +103,12 @@ sim_core_test: sim_core_test.o sim_core.o instructions.o instr_table.o
 
 utils.o: utils.c utils.h
 	${CC} ${CFLAGS} -c utils.c
+
+circbuf.o: circbuf.c circbuf.h
+	${CC} ${CFLAGS} -c circbuf.c
+
+mbox.o: mbox.c mbox.h dlist.h
+	${CC} ${CFLAGS} -c mbox.c
+
+fifostdio: fifostdio.c
+	${CC} -g -o fifostdio fifostdio.c
