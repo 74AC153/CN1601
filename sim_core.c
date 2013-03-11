@@ -689,6 +689,8 @@ int sim_core_update(
 	sim_core_output_t *output,
 	sim_core_input_t *input)
 {
+	int status = 0;
+
 	/* propagate input to state, state to output */
 	update_propagate_signals(state, output, input);
 
@@ -818,6 +820,13 @@ int sim_core_update(
 		// next instruction
 		state->pc = state->inter.nextpc;
 		output->instr.request = false;
+		// indicate if we've gone into an unwakeable sleep
+		if(! STATUS_GET_GIE(state->ctl.named.status) ||
+		   ! state->ctl.named.ienable) {
+			TRACE(state, 1, "core: unwakeable SLEEP\n");
+			status = -1;
+		}
+
 		goto counter;
 	}
 
@@ -834,7 +843,7 @@ counter:
 		state->ctl.named.counter_high++;
 	}
 
-	return 0;
+	return status;
 }
 
 int sim_core_cp_op_pending(
