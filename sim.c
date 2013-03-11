@@ -12,6 +12,7 @@
 #include "sim_memif.h"
 #include "sim_cp_timer.h"
 #include "sim_cp_nvram.h"
+#include "sim_cp_uart.h"
 #include "utils.h"
 
 /******************************************
@@ -32,6 +33,7 @@ uint16_t physmem[PHYSMEM_NUMWORDS];
 
 sim_cp_timer_state_t timer_state;
 sim_cp_nvram_state_t nvram_state;
+sim_cp_uart_state_t uart_state;
 
 bool g_continue = true;
 
@@ -68,6 +70,18 @@ sim_cp_info_t coproc_info[] = {
 		NULL, /*fetch*/
 		nvram_state_print
 	},
+	{
+		"uart",
+		"-r <rxfifo> -t <txfifo>",
+		(sim_cp_state_hdr_t *) &uart_state, 
+		uart_state_init,
+		uart_state_deinit,
+		uart_state_reset,
+		uart_state_data,
+		uart_state_exec,
+		NULL, /*fetch*/
+		uart_state_print
+	}
 };
 /* FIXME: change this to NUM_COPROCS */
 #define ARRLEN(ARR) (sizeof(ARR) / sizeof(ARR[0]))
@@ -304,7 +318,7 @@ int split(char *str, char *seps, bool zerolen,
 	return 0;
 }
 
-void cycle(void)
+int cycle(void)
 {
 	unsigned int i;
 	int status, cpnum;
@@ -351,7 +365,9 @@ void cycle(void)
 		}
 	}
 
-	sim_core_update(&core_state, &core_output, &core_input);
+	status = sim_core_update(&core_state, &core_output, &core_input);
+
+	return status;
 }
 
 void reset_core(void)
@@ -457,7 +473,7 @@ int do_interp_goto(int argc, char *argv[])
 
 int do_interp_step(int argc, char *argv[])
 {
-	int numsteps;
+	int numsteps, status;
 	if(argc == 1) {
 		numsteps = strtol(argv[0], NULL, 0);
 	} else if(argc == 0) {
@@ -468,18 +484,27 @@ int do_interp_step(int argc, char *argv[])
 	}
 
 	printf("running %u cycles\n", numsteps);
-	while(numsteps--) {
-		cycle();
+	status = 0;
+	while(numsteps-- && !status) {
+		status = cycle();
+	}
+	if(status < 0) {
+		return -1;
 	}
 	return 0;
 }
 
 int do_interp_continue(void)
 {
+	int status;
 	signal(SIGINT, unset_run_sim);
 	printf("continuing\n");
-	while(g_continue) {
-		cycle();
+	status = 0;
+	while(g_continue && !status) {
+		status = cycle();
+	}
+	if(status < 0) {
+		return -1;
 	}
 	return 0;
 }
@@ -744,6 +769,7 @@ int main(int argc, char *argv[])
 		goto interp;
 	}
 
+	status = 0;
 	while(!status) {
 		printf("> ");
 		fflush(stdout);
