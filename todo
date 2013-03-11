@@ -1,7 +1,6 @@
-make adding coprocessor modules easier using standardized module record
+finish uart
 add show coproc N
 add to spec: trap behavior table
-nail down external interrupt behavior spec -- (mid) reg, (mid) branch, (mid) mem, (mid) coproc, (mid) mode
 //memory faults don't cause interrupts in superuser mode -> software must check
 //add memory fault pending bits to IPEND register
 add ability to get/set reg/state values in sim
@@ -12,6 +11,8 @@ remove exint_ack bus from spec (replace with coproc op
 make ordering of input/output/etc inside subroutines to cycle() consistent
 modify cpop to set bits on cp address bus too instead of wasting
 honor outbuflen in generate_opcodes
+add linking for assembler
+add binary offsets for assembler 
 
 update spec
 
