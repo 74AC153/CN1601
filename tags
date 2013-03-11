@@ -1,5 +1,6 @@
 ARRLEN	sim.c	/^#define ARRLEN(ARR) (sizeof(ARR) \/ sizeof(ARR[0])/
 BITMASK	instructions.c	/^#define BITMASK(WIDTH, START) \\$/
+CIRCBUF_H	circbuf.h	/^#define CIRCBUF_H$/
 CP_NVRAM_DELAY_CYCLES	sim_cp_nvram.h	/^#define CP_NVRAM_DELAY_CYCLES 3$/
 CP_NVRAM_INSTR_ACK	sim_cp_nvram.h	/^#define CP_NVRAM_INSTR_ACK 3$/
 CP_NVRAM_INSTR_GETLEN_HI	sim_cp_nvram.h	/^#define CP_NVRAM_INSTR_GETLEN_HI 5$/
@@ -28,13 +29,38 @@ CP_TIMER_REG_CTL_EN_LEN	sim_cp_timer.h	/^#define CP_TIMER_REG_CTL_EN_LEN 1$/
 CP_TIMER_REG_CTL_EN_START	sim_cp_timer.h	/^#define CP_TIMER_REG_CTL_EN_START 0$/
 CP_TIMER_REG_CYCLE_HI	sim_cp_timer.h	/^#define CP_TIMER_REG_CYCLE_HI 2$/
 CP_TIMER_REG_CYCLE_LO	sim_cp_timer.h	/^#define CP_TIMER_REG_CYCLE_LO 1$/
+CP_UART_FIFOS_OFF	sim_cp_uart.h	/^#define CP_UART_FIFOS_OFF 9$/
+CP_UART_FIFOS_ON	sim_cp_uart.h	/^#define CP_UART_FIFOS_ON 8$/
+CP_UART_INSTR_CLEAR	sim_cp_uart.h	/^#define CP_UART_INSTR_CLEAR 7$/
+CP_UART_INSTR_NOOP	sim_cp_uart.h	/^#define CP_UART_INSTR_NOOP 0$/
+CP_UART_INSTR_RECV	sim_cp_uart.h	/^#define CP_UART_INSTR_RECV 2$/
+CP_UART_INSTR_RESET_RX	sim_cp_uart.h	/^#define CP_UART_INSTR_RESET_RX 6$/
+CP_UART_INSTR_RESET_TX	sim_cp_uart.h	/^#define CP_UART_INSTR_RESET_TX 5$/
+CP_UART_INSTR_RXUSED	sim_cp_uart.h	/^#define CP_UART_INSTR_RXUSED 4$/
+CP_UART_INSTR_SEND	sim_cp_uart.h	/^#define CP_UART_INSTR_SEND 1$/
+CP_UART_INSTR_TXUSED	sim_cp_uart.h	/^#define CP_UART_INSTR_TXUSED 3$/
+CP_UART_INT_ACK	sim_cp_uart.h	/^#define CP_UART_INT_ACK 10$/
+CP_UART_REG_CTL	sim_cp_uart.h	/^#define CP_UART_REG_CTL 0$/
+CP_UART_REG_CTL_RX_AVAIL_INT	sim_cp_uart.h	/^#define CP_UART_REG_CTL_RX_AVAIL_INT 2$/
+CP_UART_REG_CTL_TX_SPACE_INT	sim_cp_uart.h	/^#define CP_UART_REG_CTL_TX_SPACE_INT 1$/
+CP_UART_REG_STATUS	sim_cp_uart.h	/^#define CP_UART_REG_STATUS 1$/
+CP_UART_REG_STATUS_RX_AVAIL	sim_cp_uart.h	/^#define CP_UART_REG_STATUS_RX_AVAIL 2$/
+CP_UART_REG_STATUS_TX_SPACE	sim_cp_uart.h	/^#define CP_UART_REG_STATUS_TX_SPACE 1$/
+CP_UART_REG_VAL	sim_cp_uart.h	/^#define CP_UART_REG_VAL 2$/
+DLIST_H	dlist.h	/^#define DLIST_H$/
+DLIST_STATIC_INITIALIZER	dlist.h	/^#define DLIST_STATIC_INITIALIZER(LIST) \\$/
+FIFO_LEN	sim_cp_uart.h	/^#define FIFO_LEN 16$/
 INSTRUCTIONS_H	instructions.h	/^#define INSTRUCTIONS_H$/
 INSTR_TABLE_H	instr_table.h	/^#define INSTR_TABLE_H$/
 MAX_WORDS	asm.c	/^#define MAX_WORDS 65536$/
+MBOX_H	mbox.h	/^#define MBOX_H$/
 MEMIF_DELAY	sim_memif.h	/^#define MEMIF_DELAY 1$/
 Masm	asm.c	/^int main(int argc, char *argv[])$/
+Mcdevclt	cdevclt.c	/^int main(int argc, char *argv[])$/
 Mdasm	dasm.c	/^int main(int argc, char *argv[])$/
+Mfifostdio	fifostdio.c	/^int main(int argc, char *argv[])$/
 Minstructions_test	instructions_test.c	/^int main(int argc, char *argv[])$/
+Mptymaster	ptymaster.c	/^int main(int argc, char *argv[])$/
 Msim	sim.c	/^int main(int argc, char *argv[])$/
 Msim_core_test	sim_core_test.c	/^int main(int argc, char *argv[])$/
 NVRAM_ADDR_HI	sim_cp_nvram.c	/^#define NVRAM_ADDR_HI(STATE) ((STATE)->hdr.regs[CP/
@@ -45,6 +71,7 @@ NVRAM_VAL	sim_cp_nvram.c	/^#define NVRAM_VAL(STATE) ((STATE)->hdr.regs[CP_NVR/
 OPCODE_NUMBITS	instr_table.h	/^#define OPCODE_NUMBITS 5 $/
 OPCODE_STARTBIT	instr_table.h	/^#define OPCODE_STARTBIT 11$/
 PHYSMEM_NUMWORDS	sim.c	/^#define PHYSMEM_NUMWORDS 65535$/
+POLL_TIMEOUT_MS	sim_cp_uart.c	/^#define POLL_TIMEOUT_MS 100$/
 SET_BIT	sim_core.c	/^#define SET_BIT(FIELD, BIT, VAL) \\$/
 SGNEXTEND	asm.c	/^#define SGNEXTEND(VAL, TYPE, BITNUM) \\$/
 SIM_CORE_H	sim_core.h	/^#define SIM_CORE_H$/
@@ -55,6 +82,7 @@ SIM_CORE_NUM_GPREGS	sim_core.h	/^#define SIM_CORE_NUM_GPREGS 8$/
 SIM_CP_IF	sim_cp_if.h	/^#define SIM_CP_IF$/
 SIM_CP_NVRAM_H	sim_cp_nvram.h	/^#define SIM_CP_NVRAM_H$/
 SIM_CP_TIMER_H	sim_cp_timer.h	/^#define SIM_CP_TIMER_H$/
+SIM_CP_UART_H	sim_cp_uart.h	/^#define SIM_CP_UART_H$/
 SIM_MEMIF_H	sim_memif.h	/^#define SIM_MEMIF_H$/
 SIM_PHYSMEM_ADDR_BITS	sim_physmem.h	/^#define SIM_PHYSMEM_ADDR_BITS 16$/
 SIM_PHYSMEM_DATA_BITS	sim_physmem.h	/^#define SIM_PHYSMEM_DATA_BITS 16$/
@@ -89,14 +117,41 @@ alu_exec	sim_core.c	/^uint16_t alu_exec(alu_op_t op, uint16_t arg0, uint/
 alu_op_t	sim_core.c	/^} alu_op_t;$/
 assemble_instruction	instructions.c	/^int assemble_instruction($/
 bitmask16	utils.h	/^uint16_t bitmask16(int start, int num)$/
+charmsg_new	sim_cp_uart.c	/^charmsg_t *charmsg_new(char c)$/
+charmsg_t	sim_cp_uart.c	/^} charmsg_t;$/
 check_pending_interrupt	sim_core.c	/^int check_pending_interrupt($/
+circbuf_read	circbuf.c	/^size_t circbuf_read(void *out, size_t outlen, void/
+circbuf_reset	circbuf.c	/^void circbuf_reset(circbufinfo_t *info)$/
+circbuf_space	circbuf.c	/^size_t circbuf_space(circbufinfo_t *info)$/
+circbuf_used	circbuf.c	/^size_t circbuf_used(circbufinfo_t *info)$/
+circbuf_write	circbuf.c	/^size_t circbuf_write(void *in, size_t inlen, void /
+circbufinfo_init	circbuf.c	/^circbufinfo_t *circbufinfo_init(void *p, size_t le/
+circbufinfo_t	circbuf.h	/^} circbufinfo_t;$/
 cli_args_t	sim.c	/^} cli_args_t;$/
 cli_opts_t	sim_core_test.c	/^} cli_opts_t;$/
 coproc_op_t	sim_core.h	/^} coproc_op_t;$/
-cycle	sim.c	/^void cycle(void)$/
+cycle	sim.c	/^int cycle(void)$/
 decode_instruction	instructions.c	/^int decode_instruction($/
 demux_lines	sim_utils.c	/^void demux_lines(uint32_t inval, uint8_t **lines, /
 disassemble	dasm.c	/^int disassemble(uint16_t instr, char *outstr, size/
+dlist	dlist.h	/^struct dlist {$/
+dlist_first	dlist.h	/^dlnode_t *dlist_first(dlist_t *l)$/
+dlist_init	dlist.h	/^void dlist_init(dlist_t *l)$/
+dlist_insertfirst	dlist.h	/^void dlist_insertfirst(dlist_t *l, dlnode_t *n)$/
+dlist_insertlast	dlist.h	/^void dlist_insertlast(dlist_t *l, dlnode_t *n)$/
+dlist_is_empty	dlist.h	/^bool dlist_is_empty(dlist_t *l)$/
+dlist_last	dlist.h	/^dlnode_t *dlist_last(dlist_t *l)$/
+dlist_t	dlist.h	/^typedef struct dlist dlist_t;$/
+dlnode	dlist.h	/^struct dlnode {$/
+dlnode_init	dlist.h	/^dlnode_t *dlnode_init(dlnode_t *n)$/
+dlnode_insertnext	dlist.h	/^void dlnode_insertnext(dlnode_t *n, dlnode_t *next/
+dlnode_insertprev	dlist.h	/^void dlnode_insertprev(dlnode_t *n, dlnode_t *prev/
+dlnode_is_terminal	dlist.h	/^bool dlnode_is_terminal(dlnode_t *n)$/
+dlnode_next	dlist.h	/^dlnode_t *dlnode_next(dlnode_t *n)$/
+dlnode_owner	dlist.h	/^dlist_t *dlnode_owner(dlnode_t *n)$/
+dlnode_prev	dlist.h	/^dlnode_t *dlnode_prev(dlnode_t *n)$/
+dlnode_remove	dlist.h	/^dlnode_t *dlnode_remove(dlnode_t *n)$/
+dlnode_t	dlist.h	/^typedef struct dlnode dlnode_t;$/
 do_interp_continue	sim.c	/^int do_interp_continue(void)$/
 do_interp_goto	sim.c	/^int do_interp_goto(int argc, char *argv[])$/
 do_interp_load	sim.c	/^int do_interp_load(int argc, char *argv[])$/
@@ -121,6 +176,14 @@ issymchar	asm.c	/^int issymchar(int c)$/
 labeldec_t	asm.c	/^typedef struct labeldec labeldec_t;$/
 linedec_t	asm.c	/^typedef struct linedec linedec_t;$/
 load_file	sim_core_test.c	/^int load_file(char *path, char **data, size_t *dat/
+mbox_init	mbox.c	/^mbox_t *mbox_init(void *p)$/
+mbox_len	mbox.c	/^size_t mbox_len(mbox_t *box)$/
+mbox_msg_get	mbox.c	/^msg_t *mbox_msg_get(mbox_t *box)$/
+mbox_msg_get_wait	mbox.c	/^msg_t *mbox_msg_get_wait(mbox_t *box, unsigned lon/
+mbox_msg_post	mbox.c	/^void mbox_msg_post(mbox_t *box, msg_t *msg)$/
+mbox_t	mbox.h	/^} mbox_t;$/
+msg_init	mbox.c	/^msg_t *msg_init(void *p)$/
+msg_t	mbox.h	/^} msg_t;$/
 mux_lines	sim_utils.c	/^void mux_lines(uint8_t **lines, int nlines, uint32/
 nextsym	asm.c	/^int nextsym(char *line, char **sym, int (*valid)(i/
 nmemonic_syntax	instructions.c	/^int nmemonic_syntax($/
@@ -147,9 +210,10 @@ reset	sim.c	/^int reset(void)$/
 reset_core	sim.c	/^void reset_core(void)$/
 reset_mem	sim.c	/^void reset_mem(void)$/
 resolve_nmemonic	instructions.c	/^int resolve_nmemonic($/
+restore	fifostdio.c	/^void restore(int s)$/
 run_case	instructions_test.c	/^void run_case(int i)$/
+rx_thr_fun	sim_cp_uart.c	/^void *rx_thr_fun(void *p)$/
 sim_core_cp_input_t	sim_core.h	/^} sim_core_cp_input_t;$/
-sim_core_cp_op_pending	sim_core.c	/^int sim_core_cp_op_pending($/
 sim_core_cp_output_t	sim_core.h	/^} sim_core_cp_output_t;$/
 sim_core_exec	sim_core.c	/^int sim_core_exec($/
 sim_core_input_init	sim_core.c	/^sim_core_input_t *sim_core_input_init($/
@@ -169,6 +233,7 @@ sim_cp_nvram_state_t	sim_cp_nvram.h	/^} sim_cp_nvram_state_t;$/
 sim_cp_read	sim_cp_if.c	/^void sim_cp_read($/
 sim_cp_state_hdr_t	sim_cp_if.h	/^} sim_cp_state_hdr_t;$/
 sim_cp_timer_state_t	sim_cp_timer.h	/^} sim_cp_timer_state_t;$/
+sim_cp_uart_state_t	sim_cp_uart.h	/^} sim_cp_uart_state_t;$/
 sim_cp_write	sim_cp_if.c	/^void sim_cp_write($/
 sim_memif_access	sim_memif.c	/^void sim_memif_access($/
 sim_memif_init	sim_memif.c	/^void sim_memif_init($/
@@ -187,6 +252,13 @@ timer_state_data	sim_cp_timer.c	/^int timer_state_data(sim_cp_state_hdr_t *hdr)$
 timer_state_exec	sim_cp_timer.c	/^int timer_state_exec(sim_cp_state_hdr_t *hdr)$/
 timer_state_print	sim_cp_timer.c	/^int timer_state_print(sim_cp_state_hdr_t *hdr)$/
 tokenize	asm.c	/^int tokenize(int infd, linedec_t **lines_head, lin/
+tx_thr_fun	sim_cp_uart.c	/^void *tx_thr_fun(void *p)$/
+uart_state_data	sim_cp_uart.c	/^int uart_state_data(sim_cp_state_hdr_t *hdr)$/
+uart_state_deinit	sim_cp_uart.c	/^int uart_state_deinit(sim_cp_state_hdr_t *hdr)$/
+uart_state_exec	sim_cp_uart.c	/^int uart_state_exec(sim_cp_state_hdr_t *hdr)$/
+uart_state_init	sim_cp_uart.c	/^int uart_state_init(sim_cp_state_hdr_t *hdr)$/
+uart_state_print	sim_cp_uart.c	/^int uart_state_print(sim_cp_state_hdr_t *hdr)$/
+uart_state_reset	sim_cp_uart.c	/^int uart_state_reset(sim_cp_state_hdr_t *hdr)$/
 unset_run_sim	sim.c	/^void unset_run_sim(int arg)$/
 update_propagate_signals	sim_core.c	/^static void update_propagate_signals($/
 usage	asm.c	/^void usage(char *progname)$/
