@@ -823,7 +823,7 @@ int sim_core_update(
 		// indicate if we've gone into an unwakeable sleep
 		if(! STATUS_GET_GIE(state->ctl.named.status) ||
 		   ! state->ctl.named.ienable) {
-			TRACE(state, 1, "core: unwakeable SLEEP\n");
+			printf("core: unwakeable SLEEP\n");
 			status = -1;
 		}
 

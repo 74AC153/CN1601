@@ -89,6 +89,7 @@ sim_cp_info_t coproc_info[] = {
 typedef struct {
 	char *infile;
 	bool debug;
+	bool haltstate;
 	int startaddr;
 	int loadoff;
 	char *cparg[8];
@@ -97,12 +98,13 @@ typedef struct {
 void usage(char *progname)
 {
 	unsigned int i;
-	printf("usage: %s [-i <img>] [-o <off>] [-s <start>] [-d] [-# <args>]\n", 
+	printf("usage: %s [-i <img>] [-o <off>] [-s <start>] [-d] [-# <args>] [-e]\n", 
 	       progname);
 	printf("<img>: initial memory image, if not specified, -d implied\n");
 	printf("<off>: load offset for <img>, defaults to 0\n");
 	printf("<start>: starting PC address, defaults to 0\n");
 	printf("-d: start in command mode\n");
+	printf("-e: print core state at exit\n");
 	printf("-# <args>: # from 0..%d, <args> comma delimited with no spaces\n",
 	       (int) ARRLEN(coproc_info) - 1);
 	for(i = 0; i < ARRLEN(coproc_info); i++) {
@@ -117,12 +119,13 @@ int parse_cli(int argc, char *argv[], cli_args_t *args)
 	int ch;
 	memset(args, 0, sizeof(*args));
 
-	while((ch = getopt(argc, argv, "i:o:s:d0:1:2:3:4:5:6:7:")) != -1) {
+	while((ch = getopt(argc, argv, "i:o:s:de0:1:2:3:4:5:6:7:")) != -1) {
 		switch(ch) {
 		case 'i': args->infile = optarg; break;
 		case 'o': args->loadoff = strtol(optarg, NULL, 0); break;
 		case 's': args->startaddr = strtol(optarg, NULL, 0); break;
 		case 'd': args->debug = true; break;
+		case 'e': args->haltstate = true; break;
 		case '0': 
 		case '1':
 		case '2':
@@ -783,6 +786,11 @@ int main(int argc, char *argv[])
 interp:
 		memcpy(lastline, linebuf, sizeof(lastline));
 		status = interpret(linebuf);
+	}
+
+	/* print state at halt if requested */
+	if(args.haltstate) {
+		do_interp_show(0, NULL);
 	}
 
 	/* de-init */
