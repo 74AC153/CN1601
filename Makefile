@@ -3,10 +3,10 @@ CC=gcc
 CFLAGS=-g -Wall -Wextra -Wno-unused
 LDFLAGS=-lpthread
 
-default: instructions_test asm dasm sim index utils_test fifostdio
+default: instructions_test asm dasm sim index fifostdio
 
 clean:
-	rm *.o instructions_test asm dasm sim tags cscope.out
+	rm *.o instructions_test asm dasm sim fifostdio utils_test tags cscope.out
 
 index: tags cscope.out
 
@@ -77,7 +77,7 @@ sim_test: sim_test.o sim_core.o sim_utils.o
 	${CC} ${LDFLAGS} -o sim_test sim_test.o sim_core.o sim_utils.o
 
 sim: sim.o sim_core.o sim_utils.o instructions.o \
-     instr_table.o utils.o circbuf.o sim_cp_if.o \
+     instr_table.o utils.o  sim_cp_if.o \
      sim_memif.o sim_cp_timer.o sim_cp_nvram.o \
      sim_cp_uart.o mbox.o
 	${CC} ${LDFLAGS} -o sim \
@@ -87,7 +87,6 @@ sim: sim.o sim_core.o sim_utils.o instructions.o \
 	instructions.o \
 	instr_table.o \
 	utils.o \
-	circbuf.o \
 	sim_cp_if.o \
 	sim_memif.o \
 	sim_cp_timer.o \
@@ -103,9 +102,6 @@ sim_core_test: sim_core_test.o sim_core.o instructions.o instr_table.o
 
 utils.o: utils.c utils.h
 	${CC} ${CFLAGS} -c utils.c
-
-circbuf.o: circbuf.c circbuf.h
-	${CC} ${CFLAGS} -c circbuf.c
 
 mbox.o: mbox.c mbox.h dlist.h
 	${CC} ${CFLAGS} -c mbox.c
