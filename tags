@@ -1,6 +1,5 @@
 ARRLEN	sim.c	/^#define ARRLEN(ARR) (sizeof(ARR) \/ sizeof(ARR[0])/
 BITMASK	instructions.c	/^#define BITMASK(WIDTH, START) \\$/
-CIRCBUF_H	circbuf.h	/^#define CIRCBUF_H$/
 CP_NVRAM_DELAY_CYCLES	sim_cp_nvram.h	/^#define CP_NVRAM_DELAY_CYCLES 3$/
 CP_NVRAM_INSTR_ACK	sim_cp_nvram.h	/^#define CP_NVRAM_INSTR_ACK 3$/
 CP_NVRAM_INSTR_GETLEN_HI	sim_cp_nvram.h	/^#define CP_NVRAM_INSTR_GETLEN_HI 5$/
@@ -56,11 +55,9 @@ MAX_WORDS	asm.c	/^#define MAX_WORDS 65536$/
 MBOX_H	mbox.h	/^#define MBOX_H$/
 MEMIF_DELAY	sim_memif.h	/^#define MEMIF_DELAY 1$/
 Masm	asm.c	/^int main(int argc, char *argv[])$/
-Mcdevclt	cdevclt.c	/^int main(int argc, char *argv[])$/
 Mdasm	dasm.c	/^int main(int argc, char *argv[])$/
 Mfifostdio	fifostdio.c	/^int main(int argc, char *argv[])$/
 Minstructions_test	instructions_test.c	/^int main(int argc, char *argv[])$/
-Mptymaster	ptymaster.c	/^int main(int argc, char *argv[])$/
 Msim	sim.c	/^int main(int argc, char *argv[])$/
 Msim_core_test	sim_core_test.c	/^int main(int argc, char *argv[])$/
 NVRAM_ADDR_HI	sim_cp_nvram.c	/^#define NVRAM_ADDR_HI(STATE) ((STATE)->hdr.regs[CP/
@@ -120,13 +117,6 @@ bitmask16	utils.h	/^uint16_t bitmask16(int start, int num)$/
 charmsg_new	sim_cp_uart.c	/^charmsg_t *charmsg_new(char c)$/
 charmsg_t	sim_cp_uart.c	/^} charmsg_t;$/
 check_pending_interrupt	sim_core.c	/^int check_pending_interrupt($/
-circbuf_read	circbuf.c	/^size_t circbuf_read(void *out, size_t outlen, void/
-circbuf_reset	circbuf.c	/^void circbuf_reset(circbufinfo_t *info)$/
-circbuf_space	circbuf.c	/^size_t circbuf_space(circbufinfo_t *info)$/
-circbuf_used	circbuf.c	/^size_t circbuf_used(circbufinfo_t *info)$/
-circbuf_write	circbuf.c	/^size_t circbuf_write(void *in, size_t inlen, void /
-circbufinfo_init	circbuf.c	/^circbufinfo_t *circbufinfo_init(void *p, size_t le/
-circbufinfo_t	circbuf.h	/^} circbufinfo_t;$/
 cli_args_t	sim.c	/^} cli_args_t;$/
 cli_opts_t	sim_core_test.c	/^} cli_opts_t;$/
 coproc_op_t	sim_core.h	/^} coproc_op_t;$/
