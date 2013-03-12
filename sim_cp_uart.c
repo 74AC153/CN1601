@@ -123,6 +123,7 @@ int uart_state_init(sim_cp_state_hdr_t *hdr)
 	int status, ch;
 	sim_cp_uart_state_t *state = (sim_cp_uart_state_t *) hdr;
 
+
 	optind = 0;
 	while((ch = getopt(hdr->argc, hdr->argv, "r:t:")) != -1) {
 		switch(ch) {
@@ -137,28 +138,27 @@ int uart_state_init(sim_cp_state_hdr_t *hdr)
 			return -1;
 		}
 	}
-	if(!state->rxpath) {
-		fprintf(stderr, "uart error: path to rxfifo required\n");
+	if(state->rxpath) {
+		fprintf(stderr, "uart: opening Rx FIFO at %s\n", state->rxpath);
+		state->rxfd = open(state->rxpath, O_RDONLY);
+		if(state->rxfd < 0) {
+			fprintf(stderr, "uart: error opening %s: %s (errno=%d)\n",
+		       	state->rxpath, strerror(errno), errno);
+		}
 		return -1;
+	} else {
+		state->rxfd = -1;
 	}
-	if(!state->txpath) {
-		fprintf(stderr, "uart error: path to txfifo required\n");
-		return -1;
-	}
-	
-	//fprintf(stderr, "uart: opening Rx FIFO at %s\n", state->rxpath);
-	state->rxfd = open(state->rxpath, O_RDONLY);
-	if(state->rxfd < 0) {
-		fprintf(stderr, "uart: error opening %s: %s (errno=%d)\n",
-		       state->rxpath, strerror(errno), errno);
-		return -1;
-	}
-	//fprintf(stderr, "uart: opening Tx FIFO at %s\n", state->rxpath);
-	state->txfd = open(state->txpath, O_WRONLY);
-	if(state->txfd < 0) {
-		fprintf(stderr, "uart: error opening %s: %s (errno=%d)\n",
-		       state->txpath, strerror(errno), errno);
-		return -1;
+	if(state->txpath) {
+		fprintf(stderr, "uart: opening Tx FIFO at %s\n", state->rxpath);
+		state->txfd = open(state->txpath, O_WRONLY);
+		if(state->txfd < 0) {
+			fprintf(stderr, "uart: error opening %s: %s (errno=%d)\n",
+			state->txpath, strerror(errno), errno);
+			return -1;
+		}
+	} else {
+		state->txfd = -1;
 	}
 
 	mbox_init(&(state->in_box));
@@ -166,8 +166,12 @@ int uart_state_init(sim_cp_state_hdr_t *hdr)
 	state->fifo_len = FIFO_LEN;
 	state->run_threads = 1;
 
-	pthread_create(&(state->rx_thr), NULL, rx_thr_fun, state);
-	pthread_create(&(state->tx_thr), NULL, tx_thr_fun, state);
+	if(state->rxfd >= 0) {
+		pthread_create(&(state->rx_thr), NULL, rx_thr_fun, state);
+	}
+	if(state->txfd >= 0) {
+		pthread_create(&(state->tx_thr), NULL, tx_thr_fun, state);
+	}
 
 	return 0;
 }
@@ -176,12 +180,14 @@ int uart_state_deinit(sim_cp_state_hdr_t *hdr)
 {
 	sim_cp_uart_state_t *state = (sim_cp_uart_state_t *) hdr;
 	state->run_threads = false;
-	pthread_join(state->rx_thr, NULL);
-	pthread_join(state->tx_thr, NULL);
+	if(state->rxfd >= 0) {
+		pthread_join(state->rx_thr, NULL);
+	}
+	if(state->txfd >= 0) {
+		pthread_join(state->tx_thr, NULL);
+	}
 	close(state->rxfd);
 	close(state->txfd);
-	unlink(state->rxpath);
-	unlink(state->txpath);
 	return 0;
 }
 
