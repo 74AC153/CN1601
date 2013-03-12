@@ -1,0 +1,4 @@
+trace core 1
+trace imem 1
+trace dmem 1
+continue

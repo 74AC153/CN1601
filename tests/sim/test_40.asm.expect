@@ -1,0 +1,22 @@
+nvram: loaded ../../nvram.dat (131072 words)
+resetting core state to power-on values
+clearing memory
+reading test_40.asm.bin
+1 words loaded at offset 0x0
+setting pc to 0x0000
+> core trace level set to 00000001
+> imem trace level set to 00000001
+> dmem trace level set to 00000001
+> continuing
+mem inst: quiescent
+mem inst: delay
+core: exec pc 0
+core: exec instr stall
+mem data: idle
+core: update instr stall
+mem inst: read addr 0000 val 7000
+core: exec pc 0
+core: exec sleep
+mem data: idle
+core: update SLEEP
+core: unwakeable SLEEP
