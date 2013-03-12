@@ -37,7 +37,7 @@ void *rx_thr_fun(void *p)
 	charmsg_t *m;
 	sim_cp_uart_state_t *state = (sim_cp_uart_state_t *) p;
 
-	//fprintf(stderr, "uart: rx thr start\n");
+	fprintf(stderr, "uart: rx thr start\n");
 
 	poll_io.fd = state->rxfd;
 	poll_io.events = POLLIN;
@@ -90,7 +90,7 @@ void *rx_thr_fun(void *p)
 		}
 	}
 
-	//fprintf(stderr, "uart: rx thr finish\n");
+	fprintf(stderr, "uart: rx thr finish\n");
 
 	return NULL;
 }
@@ -100,7 +100,7 @@ void *tx_thr_fun(void *p)
 	charmsg_t *m;
 	sim_cp_uart_state_t *state = (sim_cp_uart_state_t *) p;
 
-	//fprintf(stderr, "uart: tx thr start\n");
+	fprintf(stderr, "uart: tx thr start\n");
 
 	while(state->run_threads) {
 		m = (charmsg_t *) mbox_msg_get_wait(&(state->out_box),
@@ -113,7 +113,7 @@ void *tx_thr_fun(void *p)
 		}
 	}
 
-	//fprintf(stderr, "uart: tx thr finish\n");
+	fprintf(stderr, "uart: tx thr finish\n");
 
 	return NULL;
 }
@@ -139,24 +139,26 @@ int uart_state_init(sim_cp_state_hdr_t *hdr)
 		}
 	}
 	if(state->rxpath) {
-		fprintf(stderr, "uart: opening Rx FIFO at %s\n", state->rxpath);
+		fprintf(stderr, "uart: opening Rx FIFO at %s...\n", state->rxpath);
 		state->rxfd = open(state->rxpath, O_RDONLY);
 		if(state->rxfd < 0) {
 			fprintf(stderr, "uart: error opening %s: %s (errno=%d)\n",
-		       	state->rxpath, strerror(errno), errno);
+			        state->rxpath, strerror(errno), errno);
+			return -1;
 		}
-		return -1;
+		fprintf(stderr, "uart: Rx FIFO at %s opened\n", state->rxpath);
 	} else {
 		state->rxfd = -1;
 	}
 	if(state->txpath) {
-		fprintf(stderr, "uart: opening Tx FIFO at %s\n", state->rxpath);
+		fprintf(stderr, "uart: opening Tx FIFO at %s...\n", state->txpath);
 		state->txfd = open(state->txpath, O_WRONLY);
 		if(state->txfd < 0) {
 			fprintf(stderr, "uart: error opening %s: %s (errno=%d)\n",
-			state->txpath, strerror(errno), errno);
+			        state->txpath, strerror(errno), errno);
 			return -1;
 		}
+		fprintf(stderr, "uart: Tx FIFO at %s opened\n", state->txpath);
 	} else {
 		state->txfd = -1;
 	}
@@ -224,6 +226,7 @@ int uart_state_data(sim_cp_state_hdr_t *hdr)
 		   state->hdr.regs[CP_UART_REG_CTL] & CP_UART_REG_CTL_RX_AVAIL_INT){
 			TRACE(&state->hdr, 1, "uart: raise rx data interrupt\n");
 			state->hdr.core_input->exint_sig[state->hdr.cpnum] = true;
+			state->rx_raised = true;
 		}
 	} else {
 		TRACE(&state->hdr, 1, "uart: no rx data\n");
@@ -239,6 +242,7 @@ int uart_state_data(sim_cp_state_hdr_t *hdr)
 		   state->hdr.regs[CP_UART_REG_CTL] & CP_UART_REG_CTL_TX_SPACE_INT){
 			TRACE(&state->hdr, 1, "uart: raise tx space interrupt\n");
 			state->hdr.core_input->exint_sig[state->hdr.cpnum] = true;
+			state->tx_raised = true;
 		}
 	} else {
 		TRACE(&state->hdr, 1, "uart: no tx space\n");
@@ -270,22 +274,25 @@ int uart_state_exec(sim_cp_state_hdr_t *hdr)
 
 	case CP_UART_INSTR_RECV:
 		TRACE(&state->hdr, 1, "uart: exec recv\n");
-		if(mbox_len(&state->out_box)) {
-			TRACE(&state->hdr, 1, "uart: recv data avail\n");
-			m = (charmsg_t *) mbox_msg_get(&state->out_box);
+		if(mbox_len(&state->in_box)) {
+			m = (charmsg_t *) mbox_msg_get(&state->in_box);
 			hdr->regs[CP_UART_REG_VAL] = m->c;
+			TRACE(&state->hdr, 1, "uart: recv data avail (%x)\n",
+			      hdr->regs[CP_UART_REG_VAL]);
 			free(m);
 		}
 		break;
 		
 	case CP_UART_INSTR_TXUSED:
-		TRACE(&state->hdr, 1, "uart: exec txused\n");
 		hdr->regs[CP_UART_REG_VAL] = mbox_len(&state->out_box);
+		TRACE(&state->hdr, 1, "uart: exec txused (%u)\n",
+		      hdr->regs[CP_UART_REG_VAL]);
 		break;
 
 	case CP_UART_INSTR_RXUSED:
-		TRACE(&state->hdr, 1, "uart: exec rxused\n");
 		hdr->regs[CP_UART_REG_VAL] = mbox_len(&state->in_box);
+		TRACE(&state->hdr, 1, "uart: exec rxused (%u)\n",
+		      hdr->regs[CP_UART_REG_VAL]);
 		break;
 
 	case CP_UART_INSTR_RESET_TX:
