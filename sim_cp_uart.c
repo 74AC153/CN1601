@@ -8,6 +8,7 @@
 #include <assert.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <signal.h>
 
 #include "sim_cp_uart.h"
 
@@ -118,11 +119,17 @@ void *tx_thr_fun(void *p)
 	return NULL;
 }
 
+static void sig_ignore(int sig)
+{
+	printf("uart: ignore signal %d\n", sig);
+}
+
 int uart_state_init(sim_cp_state_hdr_t *hdr)
 {
 	int status, ch;
 	sim_cp_uart_state_t *state = (sim_cp_uart_state_t *) hdr;
 
+	signal(SIGHUP, sig_ignore);
 
 	optind = 0;
 	while((ch = getopt(hdr->argc, hdr->argv, "r:t:")) != -1) {
@@ -313,17 +320,17 @@ int uart_state_exec(sim_cp_state_hdr_t *hdr)
 		}
 		break;
 
-	case CP_UART_FIFOS_ON:
+	case CP_UART_INSTR_FIFOS_ON:
 		TRACE(&state->hdr, 1, "uart: exec fifos on\n");
 		state->fifo_en = true;
 		break;
 
-	case CP_UART_FIFOS_OFF:
+	case CP_UART_INSTR_FIFOS_OFF:
 		TRACE(&state->hdr, 1, "uart: exec fifos off\n");
 		state->fifo_en = false;
 		break;
 
-	case CP_UART_INT_ACK:
+	case CP_UART_INSTR_INT_ACK:
 		TRACE(&state->hdr, 1, "uart: exec int ack\n");
 		state->hdr.core_input->exint_sig[state->hdr.cpnum] = false;
 		break;

@@ -28,9 +28,9 @@
 #define CP_UART_INSTR_RESET_TX 5
 #define CP_UART_INSTR_RESET_RX 6
 #define CP_UART_INSTR_CLEAR 7
-#define CP_UART_FIFOS_ON 8
-#define CP_UART_FIFOS_OFF 9
-#define CP_UART_INT_ACK 10
+#define CP_UART_INSTR_FIFOS_ON 8
+#define CP_UART_INSTR_FIFOS_OFF 9
+#define CP_UART_INSTR_INT_ACK 10
 
 typedef struct {
 	sim_cp_state_hdr_t hdr;

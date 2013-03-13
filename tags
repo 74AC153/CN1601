@@ -28,9 +28,10 @@ CP_TIMER_REG_CTL_EN_LEN	sim_cp_timer.h	/^#define CP_TIMER_REG_CTL_EN_LEN 1$/
 CP_TIMER_REG_CTL_EN_START	sim_cp_timer.h	/^#define CP_TIMER_REG_CTL_EN_START 0$/
 CP_TIMER_REG_CYCLE_HI	sim_cp_timer.h	/^#define CP_TIMER_REG_CYCLE_HI 2$/
 CP_TIMER_REG_CYCLE_LO	sim_cp_timer.h	/^#define CP_TIMER_REG_CYCLE_LO 1$/
-CP_UART_FIFOS_OFF	sim_cp_uart.h	/^#define CP_UART_FIFOS_OFF 9$/
-CP_UART_FIFOS_ON	sim_cp_uart.h	/^#define CP_UART_FIFOS_ON 8$/
 CP_UART_INSTR_CLEAR	sim_cp_uart.h	/^#define CP_UART_INSTR_CLEAR 7$/
+CP_UART_INSTR_FIFOS_OFF	sim_cp_uart.h	/^#define CP_UART_INSTR_FIFOS_OFF 9$/
+CP_UART_INSTR_FIFOS_ON	sim_cp_uart.h	/^#define CP_UART_INSTR_FIFOS_ON 8$/
+CP_UART_INSTR_INT_ACK	sim_cp_uart.h	/^#define CP_UART_INSTR_INT_ACK 10$/
 CP_UART_INSTR_NOOP	sim_cp_uart.h	/^#define CP_UART_INSTR_NOOP 0$/
 CP_UART_INSTR_RECV	sim_cp_uart.h	/^#define CP_UART_INSTR_RECV 2$/
 CP_UART_INSTR_RESET_RX	sim_cp_uart.h	/^#define CP_UART_INSTR_RESET_RX 6$/
@@ -38,7 +39,6 @@ CP_UART_INSTR_RESET_TX	sim_cp_uart.h	/^#define CP_UART_INSTR_RESET_TX 5$/
 CP_UART_INSTR_RXUSED	sim_cp_uart.h	/^#define CP_UART_INSTR_RXUSED 4$/
 CP_UART_INSTR_SEND	sim_cp_uart.h	/^#define CP_UART_INSTR_SEND 1$/
 CP_UART_INSTR_TXUSED	sim_cp_uart.h	/^#define CP_UART_INSTR_TXUSED 3$/
-CP_UART_INT_ACK	sim_cp_uart.h	/^#define CP_UART_INT_ACK 10$/
 CP_UART_REG_CTL	sim_cp_uart.h	/^#define CP_UART_REG_CTL 0$/
 CP_UART_REG_CTL_RX_AVAIL_INT	sim_cp_uart.h	/^#define CP_UART_REG_CTL_RX_AVAIL_INT 2$/
 CP_UART_REG_CTL_TX_SPACE_INT	sim_cp_uart.h	/^#define CP_UART_REG_CTL_TX_SPACE_INT 1$/
@@ -203,6 +203,7 @@ resolve_nmemonic	instructions.c	/^int resolve_nmemonic($/
 restore	fifostdio.c	/^void restore(int s)$/
 run_case	instructions_test.c	/^void run_case(int i)$/
 rx_thr_fun	sim_cp_uart.c	/^void *rx_thr_fun(void *p)$/
+sig_ignore	sim_cp_uart.c	/^static void sig_ignore(int sig)$/
 sim_core_cp_input_t	sim_core.h	/^} sim_core_cp_input_t;$/
 sim_core_cp_output_t	sim_core.h	/^} sim_core_cp_output_t;$/
 sim_core_exec	sim_core.c	/^int sim_core_exec($/
